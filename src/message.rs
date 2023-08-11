@@ -56,7 +56,7 @@ impl IntoOSCMessage for RootTransform {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Bone {
+pub enum StandardVRM0Bone {
 	Hips,
 	LeftUpperLeg,
 	RightUpperLeg,
@@ -115,136 +115,136 @@ pub enum Bone {
 	RightLittleDistal
 }
 
-impl AsRef<str> for Bone {
+impl AsRef<str> for StandardVRM0Bone {
 	fn as_ref(&self) -> &'static str {
 		match self {
-			Bone::Hips => "Hips",
-			Bone::LeftUpperLeg => "LeftUpperLeg",
-			Bone::RightUpperLeg => "RightUpperLeg",
-			Bone::LeftLowerLeg => "LeftLowerLeg",
-			Bone::RightLowerLeg => "RightLowerLeg",
-			Bone::LeftFoot => "LeftFoot",
-			Bone::RightFoot => "RightFoot",
-			Bone::Pelvis => "Pelvis",
-			Bone::Spine => "Spine",
-			Bone::Chest => "Chest",
-			Bone::UpperChest => "UpperChest",
-			Bone::Neck => "Neck",
-			Bone::Head => "Head",
-			Bone::LeftShoulder => "LeftShoulder",
-			Bone::RightShoulder => "RightShoulder",
-			Bone::LeftUpperArm => "LeftUpperArm",
-			Bone::RightUpperArm => "RightUpperArm",
-			Bone::LeftLowerArm => "LeftLowerArm",
-			Bone::RightLowerArm => "RightLowerArm",
-			Bone::LeftHand => "LeftHand",
-			Bone::RightHand => "RightHand",
-			Bone::LeftToes => "LeftToes",
-			Bone::RightToes => "RightToes",
-			Bone::LeftEye => "LeftEye",
-			Bone::RightEye => "RightEye",
-			Bone::Jaw => "Jaw",
-			Bone::LeftThumbProximal => "LeftThumbProximal",
-			Bone::LeftThumbIntermediate => "LeftThumbIntermediate",
-			Bone::LeftThumbDistal => "LeftThumbDistal",
-			Bone::LeftIndexProximal => "LeftIndexProximal",
-			Bone::LeftIndexIntermediate => "LeftIndexIntermediate",
-			Bone::LeftIndexDistal => "LeftIndexDistal",
-			Bone::LeftMiddleProximal => "LeftMiddleProximal",
-			Bone::LeftMiddleIntermediate => "LeftMiddleIntermediate",
-			Bone::LeftMiddleDistal => "LeftMiddleDistal",
-			Bone::LeftRingProximal => "LeftRingProximal",
-			Bone::LeftRingIntermediate => "LeftRingIntermediate",
-			Bone::LeftRingDistal => "LeftRingDistal",
-			Bone::LeftLittleProximal => "LeftLittleProximal",
-			Bone::LeftLittleIntermediate => "LeftLittleIntermediate",
-			Bone::LeftLittleDistal => "LeftLittleDistal",
-			Bone::RightThumbProximal => "RightThumbProximal",
-			Bone::RightThumbIntermediate => "RightThumbIntermediate",
-			Bone::RightThumbDistal => "RightThumbDistal",
-			Bone::RightIndexProximal => "RightIndexProximal",
-			Bone::RightIndexIntermediate => "RightIndexIntermediate",
-			Bone::RightIndexDistal => "RightIndexDistal",
-			Bone::RightMiddleProximal => "RightMiddleProximal",
-			Bone::RightMiddleIntermediate => "RightMiddleIntermediate",
-			Bone::RightMiddleDistal => "RightMiddleDistal",
-			Bone::RightRingProximal => "RightRingProximal",
-			Bone::RightRingIntermediate => "RightRingIntermediate",
-			Bone::RightRingDistal => "RightRingDistal",
-			Bone::RightLittleProximal => "RightLittleProximal",
-			Bone::RightLittleIntermediate => "RightLittleIntermediate",
-			Bone::RightLittleDistal => "RightLittleDistal"
+			StandardVRM0Bone::Hips => "Hips",
+			StandardVRM0Bone::LeftUpperLeg => "LeftUpperLeg",
+			StandardVRM0Bone::RightUpperLeg => "RightUpperLeg",
+			StandardVRM0Bone::LeftLowerLeg => "LeftLowerLeg",
+			StandardVRM0Bone::RightLowerLeg => "RightLowerLeg",
+			StandardVRM0Bone::LeftFoot => "LeftFoot",
+			StandardVRM0Bone::RightFoot => "RightFoot",
+			StandardVRM0Bone::Pelvis => "Pelvis",
+			StandardVRM0Bone::Spine => "Spine",
+			StandardVRM0Bone::Chest => "Chest",
+			StandardVRM0Bone::UpperChest => "UpperChest",
+			StandardVRM0Bone::Neck => "Neck",
+			StandardVRM0Bone::Head => "Head",
+			StandardVRM0Bone::LeftShoulder => "LeftShoulder",
+			StandardVRM0Bone::RightShoulder => "RightShoulder",
+			StandardVRM0Bone::LeftUpperArm => "LeftUpperArm",
+			StandardVRM0Bone::RightUpperArm => "RightUpperArm",
+			StandardVRM0Bone::LeftLowerArm => "LeftLowerArm",
+			StandardVRM0Bone::RightLowerArm => "RightLowerArm",
+			StandardVRM0Bone::LeftHand => "LeftHand",
+			StandardVRM0Bone::RightHand => "RightHand",
+			StandardVRM0Bone::LeftToes => "LeftToes",
+			StandardVRM0Bone::RightToes => "RightToes",
+			StandardVRM0Bone::LeftEye => "LeftEye",
+			StandardVRM0Bone::RightEye => "RightEye",
+			StandardVRM0Bone::Jaw => "Jaw",
+			StandardVRM0Bone::LeftThumbProximal => "LeftThumbProximal",
+			StandardVRM0Bone::LeftThumbIntermediate => "LeftThumbIntermediate",
+			StandardVRM0Bone::LeftThumbDistal => "LeftThumbDistal",
+			StandardVRM0Bone::LeftIndexProximal => "LeftIndexProximal",
+			StandardVRM0Bone::LeftIndexIntermediate => "LeftIndexIntermediate",
+			StandardVRM0Bone::LeftIndexDistal => "LeftIndexDistal",
+			StandardVRM0Bone::LeftMiddleProximal => "LeftMiddleProximal",
+			StandardVRM0Bone::LeftMiddleIntermediate => "LeftMiddleIntermediate",
+			StandardVRM0Bone::LeftMiddleDistal => "LeftMiddleDistal",
+			StandardVRM0Bone::LeftRingProximal => "LeftRingProximal",
+			StandardVRM0Bone::LeftRingIntermediate => "LeftRingIntermediate",
+			StandardVRM0Bone::LeftRingDistal => "LeftRingDistal",
+			StandardVRM0Bone::LeftLittleProximal => "LeftLittleProximal",
+			StandardVRM0Bone::LeftLittleIntermediate => "LeftLittleIntermediate",
+			StandardVRM0Bone::LeftLittleDistal => "LeftLittleDistal",
+			StandardVRM0Bone::RightThumbProximal => "RightThumbProximal",
+			StandardVRM0Bone::RightThumbIntermediate => "RightThumbIntermediate",
+			StandardVRM0Bone::RightThumbDistal => "RightThumbDistal",
+			StandardVRM0Bone::RightIndexProximal => "RightIndexProximal",
+			StandardVRM0Bone::RightIndexIntermediate => "RightIndexIntermediate",
+			StandardVRM0Bone::RightIndexDistal => "RightIndexDistal",
+			StandardVRM0Bone::RightMiddleProximal => "RightMiddleProximal",
+			StandardVRM0Bone::RightMiddleIntermediate => "RightMiddleIntermediate",
+			StandardVRM0Bone::RightMiddleDistal => "RightMiddleDistal",
+			StandardVRM0Bone::RightRingProximal => "RightRingProximal",
+			StandardVRM0Bone::RightRingIntermediate => "RightRingIntermediate",
+			StandardVRM0Bone::RightRingDistal => "RightRingDistal",
+			StandardVRM0Bone::RightLittleProximal => "RightLittleProximal",
+			StandardVRM0Bone::RightLittleIntermediate => "RightLittleIntermediate",
+			StandardVRM0Bone::RightLittleDistal => "RightLittleDistal"
 		}
 	}
 }
 
-impl ToString for Bone {
+impl ToString for StandardVRM0Bone {
 	fn to_string(&self) -> String {
 		self.as_ref().to_owned()
 	}
 }
 
-impl FromStr for Bone {
+impl FromStr for StandardVRM0Bone {
 	type Err = ();
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
-			"Hips" => Ok(Bone::Hips),
-			"LeftUpperLeg" => Ok(Bone::LeftUpperLeg),
-			"RightUpperLeg" => Ok(Bone::RightUpperLeg),
-			"LeftLowerLeg" => Ok(Bone::LeftLowerLeg),
-			"RightLowerLeg" => Ok(Bone::RightLowerLeg),
-			"LeftFoot" => Ok(Bone::LeftFoot),
-			"RightFoot" => Ok(Bone::RightFoot),
-			"Pelvis" => Ok(Bone::Pelvis),
-			"Spine" => Ok(Bone::Spine),
-			"Chest" => Ok(Bone::Chest),
-			"UpperChest" => Ok(Bone::UpperChest),
-			"Neck" => Ok(Bone::Neck),
-			"Head" => Ok(Bone::Head),
-			"LeftShoulder" => Ok(Bone::LeftShoulder),
-			"RightShoulder" => Ok(Bone::RightShoulder),
-			"LeftUpperArm" => Ok(Bone::LeftUpperArm),
-			"RightUpperArm" => Ok(Bone::RightUpperArm),
-			"LeftLowerArm" => Ok(Bone::LeftLowerArm),
-			"RightLowerArm" => Ok(Bone::RightLowerArm),
-			"LeftHand" => Ok(Bone::LeftHand),
-			"RightHand" => Ok(Bone::RightHand),
-			"LeftToes" => Ok(Bone::LeftToes),
-			"RightToes" => Ok(Bone::RightToes),
-			"LeftEye" => Ok(Bone::LeftEye),
-			"RightEye" => Ok(Bone::RightEye),
-			"Jaw" => Ok(Bone::Jaw),
-			"LeftThumbProximal" => Ok(Bone::LeftThumbProximal),
-			"LeftThumbIntermediate" => Ok(Bone::LeftThumbIntermediate),
-			"LeftThumbDistal" => Ok(Bone::LeftThumbDistal),
-			"LeftIndexProximal" => Ok(Bone::LeftIndexProximal),
-			"LeftIndexIntermediate" => Ok(Bone::LeftIndexIntermediate),
-			"LeftIndexDistal" => Ok(Bone::LeftIndexDistal),
-			"LeftMiddleProximal" => Ok(Bone::LeftMiddleProximal),
-			"LeftMiddleIntermediate" => Ok(Bone::LeftMiddleIntermediate),
-			"LeftMiddleDistal" => Ok(Bone::LeftMiddleDistal),
-			"LeftRingProximal" => Ok(Bone::LeftRingProximal),
-			"LeftRingIntermediate" => Ok(Bone::LeftRingIntermediate),
-			"LeftRingDistal" => Ok(Bone::LeftRingDistal),
-			"LeftLittleProximal" => Ok(Bone::LeftLittleProximal),
-			"LeftLittleIntermediate" => Ok(Bone::LeftLittleIntermediate),
-			"LeftLittleDistal" => Ok(Bone::LeftLittleDistal),
-			"RightThumbProximal" => Ok(Bone::RightThumbProximal),
-			"RightThumbIntermediate" => Ok(Bone::RightThumbIntermediate),
-			"RightThumbDistal" => Ok(Bone::RightThumbDistal),
-			"RightIndexProximal" => Ok(Bone::RightIndexProximal),
-			"RightIndexIntermediate" => Ok(Bone::RightIndexIntermediate),
-			"RightIndexDistal" => Ok(Bone::RightIndexDistal),
-			"RightMiddleProximal" => Ok(Bone::RightMiddleProximal),
-			"RightMiddleIntermediate" => Ok(Bone::RightMiddleIntermediate),
-			"RightMiddleDistal" => Ok(Bone::RightMiddleDistal),
-			"RightRingProximal" => Ok(Bone::RightRingProximal),
-			"RightRingIntermediate" => Ok(Bone::RightRingIntermediate),
-			"RightRingDistal" => Ok(Bone::RightRingDistal),
-			"RightLittleProximal" => Ok(Bone::RightLittleProximal),
-			"RightLittleIntermediate" => Ok(Bone::RightLittleIntermediate),
-			"RightLittleDistal" => Ok(Bone::RightLittleDistal),
+			"Hips" => Ok(StandardVRM0Bone::Hips),
+			"LeftUpperLeg" => Ok(StandardVRM0Bone::LeftUpperLeg),
+			"RightUpperLeg" => Ok(StandardVRM0Bone::RightUpperLeg),
+			"LeftLowerLeg" => Ok(StandardVRM0Bone::LeftLowerLeg),
+			"RightLowerLeg" => Ok(StandardVRM0Bone::RightLowerLeg),
+			"LeftFoot" => Ok(StandardVRM0Bone::LeftFoot),
+			"RightFoot" => Ok(StandardVRM0Bone::RightFoot),
+			"Pelvis" => Ok(StandardVRM0Bone::Pelvis),
+			"Spine" => Ok(StandardVRM0Bone::Spine),
+			"Chest" => Ok(StandardVRM0Bone::Chest),
+			"UpperChest" => Ok(StandardVRM0Bone::UpperChest),
+			"Neck" => Ok(StandardVRM0Bone::Neck),
+			"Head" => Ok(StandardVRM0Bone::Head),
+			"LeftShoulder" => Ok(StandardVRM0Bone::LeftShoulder),
+			"RightShoulder" => Ok(StandardVRM0Bone::RightShoulder),
+			"LeftUpperArm" => Ok(StandardVRM0Bone::LeftUpperArm),
+			"RightUpperArm" => Ok(StandardVRM0Bone::RightUpperArm),
+			"LeftLowerArm" => Ok(StandardVRM0Bone::LeftLowerArm),
+			"RightLowerArm" => Ok(StandardVRM0Bone::RightLowerArm),
+			"LeftHand" => Ok(StandardVRM0Bone::LeftHand),
+			"RightHand" => Ok(StandardVRM0Bone::RightHand),
+			"LeftToes" => Ok(StandardVRM0Bone::LeftToes),
+			"RightToes" => Ok(StandardVRM0Bone::RightToes),
+			"LeftEye" => Ok(StandardVRM0Bone::LeftEye),
+			"RightEye" => Ok(StandardVRM0Bone::RightEye),
+			"Jaw" => Ok(StandardVRM0Bone::Jaw),
+			"LeftThumbProximal" => Ok(StandardVRM0Bone::LeftThumbProximal),
+			"LeftThumbIntermediate" => Ok(StandardVRM0Bone::LeftThumbIntermediate),
+			"LeftThumbDistal" => Ok(StandardVRM0Bone::LeftThumbDistal),
+			"LeftIndexProximal" => Ok(StandardVRM0Bone::LeftIndexProximal),
+			"LeftIndexIntermediate" => Ok(StandardVRM0Bone::LeftIndexIntermediate),
+			"LeftIndexDistal" => Ok(StandardVRM0Bone::LeftIndexDistal),
+			"LeftMiddleProximal" => Ok(StandardVRM0Bone::LeftMiddleProximal),
+			"LeftMiddleIntermediate" => Ok(StandardVRM0Bone::LeftMiddleIntermediate),
+			"LeftMiddleDistal" => Ok(StandardVRM0Bone::LeftMiddleDistal),
+			"LeftRingProximal" => Ok(StandardVRM0Bone::LeftRingProximal),
+			"LeftRingIntermediate" => Ok(StandardVRM0Bone::LeftRingIntermediate),
+			"LeftRingDistal" => Ok(StandardVRM0Bone::LeftRingDistal),
+			"LeftLittleProximal" => Ok(StandardVRM0Bone::LeftLittleProximal),
+			"LeftLittleIntermediate" => Ok(StandardVRM0Bone::LeftLittleIntermediate),
+			"LeftLittleDistal" => Ok(StandardVRM0Bone::LeftLittleDistal),
+			"RightThumbProximal" => Ok(StandardVRM0Bone::RightThumbProximal),
+			"RightThumbIntermediate" => Ok(StandardVRM0Bone::RightThumbIntermediate),
+			"RightThumbDistal" => Ok(StandardVRM0Bone::RightThumbDistal),
+			"RightIndexProximal" => Ok(StandardVRM0Bone::RightIndexProximal),
+			"RightIndexIntermediate" => Ok(StandardVRM0Bone::RightIndexIntermediate),
+			"RightIndexDistal" => Ok(StandardVRM0Bone::RightIndexDistal),
+			"RightMiddleProximal" => Ok(StandardVRM0Bone::RightMiddleProximal),
+			"RightMiddleIntermediate" => Ok(StandardVRM0Bone::RightMiddleIntermediate),
+			"RightMiddleDistal" => Ok(StandardVRM0Bone::RightMiddleDistal),
+			"RightRingProximal" => Ok(StandardVRM0Bone::RightRingProximal),
+			"RightRingIntermediate" => Ok(StandardVRM0Bone::RightRingIntermediate),
+			"RightRingDistal" => Ok(StandardVRM0Bone::RightRingDistal),
+			"RightLittleProximal" => Ok(StandardVRM0Bone::RightLittleProximal),
+			"RightLittleIntermediate" => Ok(StandardVRM0Bone::RightLittleIntermediate),
+			"RightLittleDistal" => Ok(StandardVRM0Bone::RightLittleDistal),
 			_ => Err(())
 		}
 	}
@@ -252,7 +252,7 @@ impl FromStr for Bone {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct BoneTransform {
-	pub bone: Bone,
+	pub bone: String,
 	pub position: Vector3<f32>,
 	pub rotation: UnitQuaternion<f32>,
 	pub scale: Option<Scale3<f32>>,
@@ -260,9 +260,9 @@ pub struct BoneTransform {
 }
 
 impl BoneTransform {
-	pub fn new(bone: Bone, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
+	pub fn new(bone: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
 		Self {
-			bone,
+			bone: bone.to_string(),
 			position: position.into(),
 			rotation,
 			scale: None,
@@ -270,10 +270,10 @@ impl BoneTransform {
 		}
 	}
 
-	pub fn new_mr(bone: Bone, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, scale: Scale3<f32>, offset: Vector3<f32>) -> Self {
+	pub fn new_mr(bone: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, scale: Scale3<f32>, offset: Vector3<f32>) -> Self {
 		let rotation = rotation.slerp(&rotation, 1.0);
 		Self {
-			bone,
+			bone: bone.to_string(),
 			position: position.into(),
 			rotation,
 			scale: Some(scale),
@@ -286,7 +286,7 @@ impl IntoOSCMessage for BoneTransform {
 	fn into_osc_message(self) -> crate::osc::OSCMessage {
 		let rotation = self.rotation.as_ref();
 		let mut args: Vec<OSCType> = vec![
-			self.bone.as_ref().into(),
+			self.bone.into(),
 			self.position.x.into(),
 			self.position.y.into(),
 			self.position.z.into(),
@@ -779,7 +779,7 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_w)
 				]
 			) => Ok(VMCMessage::BoneTransform(BoneTransform::new(
-				Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
+				StandardVRM0Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
 				Vector3::new(p_x, p_y, p_z),
 				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z))
 			))),
@@ -803,7 +803,7 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					..
 				]
 			) => Ok(VMCMessage::BoneTransform(BoneTransform::new_mr(
-				Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
+				StandardVRM0Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
 				Vector3::new(p_x, p_y, p_z),
 				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
 				Scale3::new(s_x, s_y, s_z),
@@ -1008,12 +1008,18 @@ mod tests {
 		let scale = Scale3::new(0.8, 1.0, 0.3);
 		let offset = Vector3::new(-0.1, 0.12, -0.3);
 
-		for bone in [Bone::Chest, Bone::RightEye, Bone::LeftIndexDistal, Bone::Spine, Bone::RightHand] {
+		for bone in [
+			StandardVRM0Bone::Chest,
+			StandardVRM0Bone::RightEye,
+			StandardVRM0Bone::LeftIndexDistal,
+			StandardVRM0Bone::Spine,
+			StandardVRM0Bone::RightHand
+		] {
 			let packet = BoneTransform::new(bone, position, rotation).into_osc_packet();
 			let parsed_packet = &parse(packet)?[0];
 			match parsed_packet {
 				VMCMessage::BoneTransform(transform) => {
-					assert_eq!(transform.bone, bone);
+					assert_eq!(transform.bone, bone.to_string());
 					assert_relative_eq!(transform.position, position);
 					assert_relative_eq!(transform.rotation, rotation);
 					assert!(transform.scale.is_none());
@@ -1026,7 +1032,7 @@ mod tests {
 			let parsed_packet = &parse(packet)?[0];
 			match parsed_packet {
 				VMCMessage::BoneTransform(transform) => {
-					assert_eq!(transform.bone, bone);
+					assert_eq!(transform.bone, bone.to_string());
 					assert_relative_eq!(transform.position, position);
 					assert_relative_eq!(transform.rotation, rotation);
 					assert_relative_eq!(transform.scale.unwrap(), scale);

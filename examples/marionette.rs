@@ -12,7 +12,7 @@ async fn main() -> VMCResult<()> {
 		for message in vmc::parse(packet)? {
 			match message {
 				VMCMessage::BoneTransform(transform) => {
-					println!("\tTransform bone: {} (pos {:?}; rot {:?})", transform.bone.as_ref(), transform.position, transform.rotation)
+					println!("\tTransform bone: {} (pos {:?}; rot {:?})", transform.bone, transform.position, transform.rotation)
 				}
 				VMCMessage::DeviceTransform(transform) => {
 					println!("\tTransform device ({:?}): {} (pos {:?}; rot {:?})", transform.device, transform.joint, transform.position, transform.rotation)

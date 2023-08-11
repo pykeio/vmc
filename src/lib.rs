@@ -25,10 +25,10 @@ use self::udp::UDPSocketStream;
 pub use self::{
 	error::{VMCError, VMCResult},
 	message::{
-		parse, ApplyBlendShapes as VMCApplyBlendShapes, BlendShape as VMCBlendShape, Bone as VMCBone, BoneTransform as VMCBoneTransform,
-		CalibrationMode as VMCCalibrationMode, CalibrationState as VMCCalibrationState, DeviceTransform as VMCDeviceTransform, DeviceType as VMCDeviceType,
-		ModelState as VMCModelState, RootTransform as VMCRootTransform, StandardVRMBlendShape as VMCStandardVRMBlendShape, State as VMCState, Time as VMCTime,
-		TrackingState as VMCTrackingState, VMCMessage
+		parse, ApplyBlendShapes as VMCApplyBlendShapes, BlendShape as VMCBlendShape, BoneTransform as VMCBoneTransform, CalibrationMode as VMCCalibrationMode,
+		CalibrationState as VMCCalibrationState, DeviceTransform as VMCDeviceTransform, DeviceType as VMCDeviceType, ModelState as VMCModelState,
+		RootTransform as VMCRootTransform, StandardVRM0Bone as VMCStandardVRM0Bone, StandardVRMBlendShape as VMCStandardVRMBlendShape, State as VMCState,
+		Time as VMCTime, TrackingState as VMCTrackingState, VMCMessage
 	},
 	osc::{IntoOSCArgs, IntoOSCMessage, IntoOSCPacket, OSCPacket, OSCType}
 };

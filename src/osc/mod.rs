@@ -1,3 +1,5 @@
+//! Implements OSC types and packet encoding/decoding.
+
 use std::{
 	convert::{TryFrom, TryInto},
 	error::Error,
@@ -25,12 +27,6 @@ pub use self::error::{OSCError, OSCResult};
 ///
 /// assert_eq!(OSCTime::try_from(UNIX_EPOCH).unwrap(), OSCTime::from((2_208_988_800, 0)));
 /// ```
-///
-/// # Conversions between `(u32, u32)`
-///
-/// Prior to version `0.5.0` of this crate, `OSCTime` was defined as a type alias to `(u32, u32)`.
-/// If you are upgrading from one of these older versions, you can use [`.into()`](Into::into) to
-/// convert between `(u32, u32)` and `OSCTime` in either direction.
 ///
 /// # Conversions between [`std::time::SystemTime`]
 ///

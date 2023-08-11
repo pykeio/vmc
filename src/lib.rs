@@ -1,3 +1,61 @@
+//! # `vmc`
+//! An asynchronous implementation of the [Virtual Motion Capture Protocol](https://protocol.vmc.info/) in Rust.
+//!
+//! While this crate is intended specifically for Virtual Motion Capture, it can also be used as an implementation of
+//! the [Open Sound Control](https://opensoundcontrol.stanford.edu/) protocol which VMC is based on; see [`crate::osc`].
+//!
+//! ## Examples
+//! See [`examples/`](https://github.com/vitri-ent/vmc/tree/main/examples/) for more detailed examples.
+//!
+//! ### Performer
+//! ```no_run
+//! use vmc::{
+//! 	VMCApplyBlendShapes, VMCBlendShape, VMCModelState, VMCResult, VMCStandardVRMBlendShape, VMCState, VMCTime
+//! };
+//!
+//! #[tokio::main]
+//! async fn main() -> VMCResult<()> {
+//! 	let socket = vmc::performer!("127.0.0.1:39539").await?;
+//! 	loop {
+//! 		socket.send(VMCBlendShape::new(VMCStandardVRMBlendShape::Joy, 1.0)).await?;
+//! 		socket.send(VMCApplyBlendShapes).await?;
+//! 		socket.send(VMCState::new(VMCModelState::Loaded)).await?;
+//! 		socket.send(VMCTime::elapsed()).await?;
+//! 	}
+//! }
+//! ```
+//!
+//! ### Marionette
+//! ```no_run
+//! use tokio_stream::StreamExt;
+//! use vmc::{VMCMessage, VMCResult};
+//!
+//! #[tokio::main]
+//! async fn main() -> VMCResult<()> {
+//! 	let mut socket = vmc::marionette!("127.0.0.1:39539").await?;
+//! 	while let Some(packet) = socket.next().await {
+//! 		let (packet, _) = packet?;
+//! 		for message in vmc::parse(packet)? {
+//! 			match message {
+//! 				VMCMessage::BoneTransform(transform) => {
+//! 					println!(
+//! 						"\tTransform bone: {} (pos {:?}; rot {:?})",
+//! 						transform.bone, transform.position, transform.rotation
+//! 					)
+//! 				}
+//! 				_ => {}
+//! 			}
+//! 		}
+//! 	}
+//!
+//! 	Ok(())
+//! }
+//! ```
+//!
+//! ## License
+//! ❤️ This package is based on [`rosc`](https://github.com/klingtnet/rosc/blob/master/Cargo.toml) by Andreas Linz and
+//! [`async-osc`](https://github.com/Frando/async-osc) by Franz Heinzmann. Licensed under MIT License or Apache-2.0.
+
 #![allow(clippy::tabs_in_doc_comments)]
 
 use std::{
@@ -198,6 +256,27 @@ impl VMCSender {
 	}
 }
 
+/// Creates a new VMC Performer. Performers process tracking, motion, and IK, and send bone transforms and other
+/// information to a [`marionette`].
+///
+/// The default usage of this usage will automatically select a free port to bind to, and send information to port 39539
+/// (default VMC receiver port) on the local machine.
+///
+/// The behavior of both binding and sending can be customized:
+/// ```no_run
+/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
+/// // default; binds to random port, sends to 127.0.0.1:39539
+/// let performer = vmc::performer!().await?;
+/// // customize bound port
+/// let performer = vmc::performer!(bind_port = 39540).await?;
+/// // customize bind address
+/// let performer = vmc::performer!(bind = "192.168.1.182:39539").await?;
+/// // customize send address & port
+/// let performer = vmc::performer!("127.13.72.16:2434").await?;
+/// // customize send address and bound port
+/// let performer = vmc::performer!("127.13.72.16:2434", bind_port = 39540).await?;
+/// # Ok(()) }) }
+/// ```
 #[macro_export]
 macro_rules! performer {
 	() => {
@@ -227,6 +306,20 @@ pub async fn _create_performer(bind: impl ToSocketAddrs, addr: impl ToSocketAddr
 	Ok(socket)
 }
 
+/// Creates a new VMC Marionette. Marionettes receive motion data from a [`performer`] and render the avatar to a
+/// screen.
+///
+/// The default usage of this usage will automatically bind to port 39539, the default VMC port.
+///
+/// The binding address can also be customized:
+/// ```no_run
+/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
+/// // default; binds to 127.0.0.1:39539
+/// let marionette = vmc::marionette!().await?;
+/// // customize bind address/port
+/// let marionette = vmc::marionette!("192.168.1.193:2434").await?;
+/// # Ok(()) }) }
+/// ```
 #[macro_export]
 macro_rules! marionette {
 	() => {

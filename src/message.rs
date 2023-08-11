@@ -1,3 +1,5 @@
+//! Submodule for Virtual Motion Capture-specific messages.
+
 use std::{str::FromStr, time::Instant};
 
 use nalgebra::{Quaternion, Scale3, UnitQuaternion, Vector3};
@@ -5,6 +7,9 @@ use once_cell::sync::Lazy;
 
 use crate::{osc::OSCMessage, IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult};
 
+/// Root Transform message (`/VMC/Ext/Root/Pos`)
+///
+/// Changes the model root absolute position, rotation, and optionally, scale & offset.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RootTransform {
 	pub position: Vector3<f32>,
@@ -14,6 +19,7 @@ pub struct RootTransform {
 }
 
 impl RootTransform {
+	/// Creates a new root transform message.
 	pub fn new(position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
 		Self {
 			position: position.into(),
@@ -23,6 +29,8 @@ impl RootTransform {
 		}
 	}
 
+	/// Creates a new root transform message with additional scale & offset parameters, which can be used to adjust the
+	/// size and position of the virtual avatar to match the physical body.
 	pub fn new_mr(position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, scale: Scale3<f32>, offset: Vector3<f32>) -> Self {
 		let rotation = rotation.slerp(&rotation, 1.0);
 		Self {
@@ -55,6 +63,9 @@ impl IntoOSCMessage for RootTransform {
 	}
 }
 
+/// Standard bones used by VRM 0.x.
+///
+/// <https://github.com/vrm-c/vrm-specification/blob/master/specification/0.0/README.md#defined-bones>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StandardVRM0Bone {
 	Hips,
@@ -271,34 +282,25 @@ impl PartialEq<StandardVRM0Bone> for String {
 	}
 }
 
+/// Bone Transform message (`/VMC/Ext/Bone/Pos`)
+///
+/// Used to adjust the position and rotation of humanoid bones.
 #[derive(Debug, Clone, PartialEq)]
 pub struct BoneTransform {
 	pub bone: String,
 	pub position: Vector3<f32>,
-	pub rotation: UnitQuaternion<f32>,
-	pub scale: Option<Scale3<f32>>,
-	pub offset: Option<Vector3<f32>>
+	pub rotation: UnitQuaternion<f32>
 }
 
 impl BoneTransform {
+	/// Creates a new bone transform message.
+	///
+	/// `bone` is the name of the bone; see [`StandardVRM0Bone`] for standard VRM 0.x bone names.
 	pub fn new(bone: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
 		Self {
 			bone: bone.to_string(),
 			position: position.into(),
-			rotation,
-			scale: None,
-			offset: None
-		}
-	}
-
-	pub fn new_mr(bone: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, scale: Scale3<f32>, offset: Vector3<f32>) -> Self {
-		let rotation = rotation.slerp(&rotation, 1.0);
-		Self {
-			bone: bone.to_string(),
-			position: position.into(),
-			rotation,
-			scale: Some(scale),
-			offset: Some(offset)
+			rotation
 		}
 	}
 }
@@ -306,24 +308,14 @@ impl BoneTransform {
 impl IntoOSCMessage for BoneTransform {
 	fn into_osc_message(self) -> crate::osc::OSCMessage {
 		let rotation = self.rotation.as_ref();
-		let mut args: Vec<OSCType> = vec![
-			self.bone.into(),
-			self.position.x.into(),
-			self.position.y.into(),
-			self.position.z.into(),
-			rotation.coords.x.into(),
-			rotation.coords.y.into(),
-			rotation.coords.z.into(),
-			rotation.coords.w.into(),
-		];
-		if let (Some(scale), Some(offset)) = (self.scale.as_ref(), self.offset.as_ref()) {
-			args.extend([scale.x.into(), scale.y.into(), scale.z.into()]);
-			args.extend([offset.x.into(), offset.y.into(), offset.z.into()]);
-		}
-		OSCMessage::new("/VMC/Ext/Bone/Pos", args)
+		OSCMessage::new(
+			"/VMC/Ext/Bone/Pos",
+			(self.bone, self.position.x, self.position.y, self.position.z, rotation.coords.x, rotation.coords.y, rotation.coords.z, rotation.coords.w)
+		)
 	}
 }
 
+/// The type of device used in [`DeviceTransform`] (HMD, controller, or independent tracker).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DeviceType {
 	HMD,
@@ -360,6 +352,7 @@ impl FromStr for DeviceType {
 	}
 }
 
+/// Device Transform message (`/VMC/Ext/{Hmd,Con,Tra}/Pos`)
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeviceTransform {
 	pub device: DeviceType,
@@ -370,6 +363,10 @@ pub struct DeviceTransform {
 }
 
 impl DeviceTransform {
+	/// Creates a new device transform message.
+	///
+	/// - `joint` is the OpenVR serial no.
+	/// - `local` determines whether the position is in raw device scale (`true`) or avatar scale (`false`).
 	pub fn new(device: DeviceType, joint: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, local: bool) -> Self {
 		Self {
 			device,
@@ -391,6 +388,11 @@ impl IntoOSCMessage for DeviceTransform {
 	}
 }
 
+/// Standard blend shapes, in VRM 0.x format.
+///
+/// Senders using a 1.x avatar should map from 1.x expressions to 0.x blendshapes when sending VMC messages.
+/// Receivers should be prepared to accept both 1.x and 0.x blend shapes:
+/// <https://protocol.vmc.info/marionette-spec#vrm-blendshapeproxyvalue>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum StandardVRMBlendShape {
 	Neutral,
@@ -490,6 +492,9 @@ impl PartialEq<StandardVRMBlendShape> for String {
 	}
 }
 
+/// Blend Shape message (`/VMC/Ext/Blend/Val`)
+///
+/// Note that blendshapes will not update until you send [`ApplyBlendShapes`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct BlendShape {
 	pub key: String,
@@ -497,6 +502,9 @@ pub struct BlendShape {
 }
 
 impl BlendShape {
+	/// Creates a new blendshape message.
+	///
+	/// See [`StandardVRMBlendShape`] for standard blendshapes.
 	pub fn new(key: impl ToString, value: f32) -> Self {
 		Self { key: key.to_string(), value }
 	}
@@ -508,6 +516,7 @@ impl IntoOSCMessage for BlendShape {
 	}
 }
 
+/// Apply Blend Shape message (`/VMC/Ext/Blend/Apply`)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ApplyBlendShapes;
 
@@ -517,10 +526,13 @@ impl IntoOSCMessage for ApplyBlendShapes {
 	}
 }
 
+/// Loading state of the virtual avatar on the sender's side.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum ModelState {
+	/// The model is not yet loaded or is currently loading.
 	NotLoaded = 0,
+	/// The model is loaded and tracking can commence.
 	Loaded = 1
 }
 
@@ -545,9 +557,13 @@ impl TryFrom<i32> for ModelState {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum CalibrationState {
+	/// The sender has not yet calibrated tracking.
 	Uncalibrated = 0,
+	/// The sender is waiting for calibration to start (i.e. loading a tracking model)
 	WaitingForCalibration = 1,
+	/// The sender is currently calibrating tracking.
 	Calibrating = 2,
+	/// The calibration is complete and tracking can commence.
 	Calibrated = 3
 }
 
@@ -598,10 +614,13 @@ impl TryFrom<i32> for CalibrationMode {
 	}
 }
 
+/// Quality of tracking.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum TrackingState {
+	/// Tracking is in poor condition (could be due to hitting the edge of the camera's view, or poor lighting)
 	Poor = 0,
+	/// Tracking is in good condition.
 	Good = 1
 }
 
@@ -623,6 +642,9 @@ impl TryFrom<i32> for TrackingState {
 	}
 }
 
+/// State/Availability message (`/VMC/Ext/OK`)
+///
+/// Used to send information like model, calibration, & tracking status.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct State {
 	pub model_state: ModelState,
@@ -631,6 +653,7 @@ pub struct State {
 }
 
 impl State {
+	/// Creates a new status message containing only the model loading state.
 	pub fn new(model_state: ModelState) -> State {
 		Self {
 			model_state,
@@ -639,6 +662,7 @@ impl State {
 		}
 	}
 
+	/// Creates a new status message containing the model loading state and calibration mode & status.
 	pub fn new_calibration(model_state: ModelState, calibration_mode: CalibrationMode, calibration_state: CalibrationState) -> State {
 		Self {
 			model_state,
@@ -647,6 +671,7 @@ impl State {
 		}
 	}
 
+	/// Creates a new status message containing the model, calibration, & tracking status.
 	pub fn new_tracking(
 		model_state: ModelState,
 		calibration_mode: CalibrationMode,
@@ -674,6 +699,7 @@ impl IntoOSCMessage for State {
 	}
 }
 
+/// Relative Time message (`/VMC/Ext/T`)
 #[derive(Debug, Clone, PartialEq)]
 pub struct Time(pub f32);
 
@@ -682,6 +708,7 @@ impl Time {
 		Self(timestamp)
 	}
 
+	/// Creates a new time message, automatically tracking relative time using a monotonic clock.
 	pub fn elapsed() -> Self {
 		static EPOCH: Lazy<Instant> = Lazy::new(Instant::now);
 		Self(EPOCH.elapsed().as_secs_f32())
@@ -694,6 +721,7 @@ impl IntoOSCMessage for Time {
 	}
 }
 
+/// Contains any possible message that can be sent over VMC protocol.
 #[derive(Debug, Clone)]
 pub enum VMCMessage {
 	RootTransform(RootTransform),
@@ -762,6 +790,8 @@ fn flatten_packet(packet: OSCPacket) -> Vec<OSCMessage> {
 	}
 }
 
+/// Parses an [`OSCPacket`] into its contained [`VMCMessage`]s. This will automatically flatten message bundles and
+/// handle the parsing to different message types. Returns an error upon encountering an unimplemented packet.
 pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 	let messages = flatten_packet(osc_packet);
 	messages
@@ -824,32 +854,6 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 				StandardVRM0Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
 				Vector3::new(p_x, p_y, p_z),
 				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z))
-			))),
-			(
-				"/VMC/Ext/Bone/Pos",
-				&[
-					OSCType::String(ref bone),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
-					OSCType::Float(s_x),
-					OSCType::Float(s_y),
-					OSCType::Float(s_z),
-					OSCType::Float(o_x),
-					OSCType::Float(o_y),
-					OSCType::Float(o_z),
-					..
-				]
-			) => Ok(VMCMessage::BoneTransform(BoneTransform::new_mr(
-				StandardVRM0Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
-				Scale3::new(s_x, s_y, s_z),
-				Vector3::new(o_x, o_y, o_z)
 			))),
 			(
 				"/VMC/Ext/Hmd/Pos",
@@ -1047,8 +1051,6 @@ mod tests {
 	fn test_parse_bone_transform() -> VMCResult<()> {
 		let position = Vector3::new(0.5, 0.2, -0.4);
 		let rotation = UnitQuaternion::new_normalize(Quaternion::new(1.0, 2.0, 3.0, 4.0));
-		let scale = Scale3::new(0.8, 1.0, 0.3);
-		let offset = Vector3::new(-0.1, 0.12, -0.3);
 
 		for bone in [
 			StandardVRM0Bone::Chest,
@@ -1064,21 +1066,6 @@ mod tests {
 					assert_eq!(transform.bone, bone);
 					assert_relative_eq!(transform.position, position);
 					assert_relative_eq!(transform.rotation, rotation);
-					assert!(transform.scale.is_none());
-					assert!(transform.offset.is_none());
-				}
-				_ => panic!()
-			}
-
-			let packet = BoneTransform::new_mr(bone, position, rotation, scale, offset).into_osc_packet();
-			let parsed_packet = &parse(packet)?[0];
-			match parsed_packet {
-				VMCMessage::BoneTransform(transform) => {
-					assert_eq!(transform.bone, bone);
-					assert_relative_eq!(transform.position, position);
-					assert_relative_eq!(transform.rotation, rotation);
-					assert_relative_eq!(transform.scale.unwrap(), scale);
-					assert_relative_eq!(transform.offset.unwrap(), offset);
 				}
 				_ => panic!()
 			}

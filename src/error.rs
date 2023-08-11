@@ -6,7 +6,6 @@ use std::{
 
 use crate::{osc, OSCType};
 
-/// Represents errors returned by `decode` or `encode`.
 #[derive(Debug)]
 pub enum VMCError {
 	Io(io::Error),

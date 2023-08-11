@@ -1,0 +1,28 @@
+[package]
+name = "vmc"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+description = "Implementation of Virtual Motion Capture protocol for virtual avatar tracking."
+repository = "https://github.com/vitri-ent/vmc"
+documentation = "https://docs.rs/vmc"
+readme = "README.md"
+edition = "2021"
+keywords = [ "vmc", "virtual motion capture" ]
+categories = [ "network-programming", "asynchronous" ]
+authors = [
+	"Carson M. <carson@pyke.io>"
+]
+rust-version = "1.70"
+
+[dependencies]
+nalgebra = "0.32"
+nom = { version = "7", default-features = false, features = [ "alloc" ] }
+tokio = { version = "1.30", features = [ "net" ] }
+tokio-stream = "0.1"
+thiserror = "1.0"
+once_cell = "1.15"
+
+[dev-dependencies]
+tokio = { version = "1.30", features = [ "net", "macros", "rt-multi-thread" ] }
+tokio-test = "0.4"
+approx = "0.5"

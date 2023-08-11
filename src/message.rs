@@ -757,7 +757,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(s_z),
 					OSCType::Float(o_x),
 					OSCType::Float(o_y),
-					OSCType::Float(o_z)
+					OSCType::Float(o_z),
+					..
 				]
 			) => Ok(VMCMessage::RootTransform(RootTransform::new_mr(
 				Vector3::new(p_x, p_y, p_z),
@@ -798,7 +799,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(s_z),
 					OSCType::Float(o_x),
 					OSCType::Float(o_y),
-					OSCType::Float(o_z)
+					OSCType::Float(o_z),
+					..
 				]
 			) => Ok(VMCMessage::BoneTransform(BoneTransform::new_mr(
 				Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
@@ -817,7 +819,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::HMD,
@@ -836,7 +839,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::HMD,
@@ -855,7 +859,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Controller,
@@ -874,7 +879,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Controller,
@@ -893,7 +899,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Tracker,
@@ -912,7 +919,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_x),
 					OSCType::Float(r_y),
 					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OSCType::Float(r_w),
+					..
 				]
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Tracker,
@@ -921,8 +929,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
 				true
 			))),
-			("/VMC/Ext/Blend/Val", &[OSCType::String(ref shape), OSCType::Float(val)]) => Ok(VMCMessage::BlendShape(BlendShape::new(shape, val))),
-			("/VMC/Ext/Blend/Apply", &[]) => Ok(VMCMessage::ApplyBlendShapes),
+			("/VMC/Ext/Blend/Val", &[OSCType::String(ref shape), OSCType::Float(val), ..]) => Ok(VMCMessage::BlendShape(BlendShape::new(shape, val))),
+			("/VMC/Ext/Blend/Apply", &[..]) => Ok(VMCMessage::ApplyBlendShapes),
 			("/VMC/Ext/OK", &[OSCType::Int(model_state)]) => Ok(VMCMessage::State(State::new(model_state.try_into().map_err(VMCError::UnknownModelState)?))),
 			("/VMC/Ext/OK", &[OSCType::Int(model_state), OSCType::Int(calibration_state), OSCType::Int(calibration_mode)]) => {
 				Ok(VMCMessage::State(State::new_calibration(
@@ -931,15 +939,22 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					calibration_state.try_into().map_err(VMCError::UnknownCalibrationState)?
 				)))
 			}
-			("/VMC/Ext/OK", &[OSCType::Int(model_state), OSCType::Int(calibration_state), OSCType::Int(calibration_mode), OSCType::Int(tracking_state)]) => {
-				Ok(VMCMessage::State(State::new_tracking(
-					model_state.try_into().map_err(VMCError::UnknownModelState)?,
-					calibration_mode.try_into().map_err(VMCError::UnknownCalibrationMode)?,
-					calibration_state.try_into().map_err(VMCError::UnknownCalibrationState)?,
-					tracking_state.try_into().map_err(VMCError::UnknownTrackingState)?
-				)))
-			}
-			("/VMC/Ext/T", &[OSCType::Float(time)]) => Ok(VMCMessage::Time(Time::new(time))),
+			(
+				"/VMC/Ext/OK",
+				&[
+					OSCType::Int(model_state),
+					OSCType::Int(calibration_state),
+					OSCType::Int(calibration_mode),
+					OSCType::Int(tracking_state),
+					..
+				]
+			) => Ok(VMCMessage::State(State::new_tracking(
+				model_state.try_into().map_err(VMCError::UnknownModelState)?,
+				calibration_mode.try_into().map_err(VMCError::UnknownCalibrationMode)?,
+				calibration_state.try_into().map_err(VMCError::UnknownCalibrationState)?,
+				tracking_state.try_into().map_err(VMCError::UnknownTrackingState)?
+			))),
+			("/VMC/Ext/T", &[OSCType::Float(time), ..]) => Ok(VMCMessage::Time(Time::new(time))),
 			(addr, args) => Err(VMCError::UnimplementedMessage(addr.to_owned(), args.to_owned()))
 		})
 		.collect()
@@ -1137,6 +1152,12 @@ mod tests {
 			_ => panic!()
 		}
 
+		Ok(())
+	}
+
+	#[test]
+	fn test_ignore_extra_args() -> VMCResult<()> {
+		assert!(parse(OSCPacket::Message(OSCMessage::new("/VMC/Ext/T", (7.0_f32, "hello")))).is_ok());
 		Ok(())
 	}
 }

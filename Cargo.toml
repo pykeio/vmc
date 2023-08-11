@@ -1,13 +1,12 @@
 [package]
 name = "vmc"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT OR Apache-2.0"
 description = "Implementation of Virtual Motion Capture protocol for virtual avatar tracking."
 repository = "https://github.com/vitri-ent/vmc"
 documentation = "https://docs.rs/vmc"
 readme = "README.md"
 edition = "2021"
-keywords = [ "vmc", "virtual motion capture" ]
 categories = [ "network-programming", "asynchronous" ]
 authors = [
 	"Carson M. <carson@pyke.io>"

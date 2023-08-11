@@ -250,6 +250,27 @@ impl FromStr for StandardVRM0Bone {
 	}
 }
 
+impl PartialEq<&str> for StandardVRM0Bone {
+	fn eq(&self, other: &&str) -> bool {
+		StandardVRM0Bone::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<String> for StandardVRM0Bone {
+	fn eq(&self, other: &String) -> bool {
+		StandardVRM0Bone::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<StandardVRM0Bone> for &str {
+	fn eq(&self, other: &StandardVRM0Bone) -> bool {
+		StandardVRM0Bone::from_str(self).as_ref() == Ok(other)
+	}
+}
+impl PartialEq<StandardVRM0Bone> for String {
+	fn eq(&self, other: &StandardVRM0Bone) -> bool {
+		StandardVRM0Bone::from_str(self).as_ref() == Ok(other)
+	}
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct BoneTransform {
 	pub bone: String,
@@ -445,6 +466,27 @@ impl FromStr for StandardVRMBlendShape {
 			"Blink_R" => Ok(StandardVRMBlendShape::BlinkR),
 			_ => Err(())
 		}
+	}
+}
+
+impl PartialEq<&str> for StandardVRMBlendShape {
+	fn eq(&self, other: &&str) -> bool {
+		StandardVRMBlendShape::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<String> for StandardVRMBlendShape {
+	fn eq(&self, other: &String) -> bool {
+		StandardVRMBlendShape::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<StandardVRMBlendShape> for &str {
+	fn eq(&self, other: &StandardVRMBlendShape) -> bool {
+		StandardVRMBlendShape::from_str(self).as_ref() == Ok(other)
+	}
+}
+impl PartialEq<StandardVRMBlendShape> for String {
+	fn eq(&self, other: &StandardVRMBlendShape) -> bool {
+		StandardVRMBlendShape::from_str(self).as_ref() == Ok(other)
 	}
 }
 
@@ -1019,7 +1061,7 @@ mod tests {
 			let parsed_packet = &parse(packet)?[0];
 			match parsed_packet {
 				VMCMessage::BoneTransform(transform) => {
-					assert_eq!(transform.bone, bone.to_string());
+					assert_eq!(transform.bone, bone);
 					assert_relative_eq!(transform.position, position);
 					assert_relative_eq!(transform.rotation, rotation);
 					assert!(transform.scale.is_none());
@@ -1032,7 +1074,7 @@ mod tests {
 			let parsed_packet = &parse(packet)?[0];
 			match parsed_packet {
 				VMCMessage::BoneTransform(transform) => {
-					assert_eq!(transform.bone, bone.to_string());
+					assert_eq!(transform.bone, bone);
 					assert_relative_eq!(transform.position, position);
 					assert_relative_eq!(transform.rotation, rotation);
 					assert_relative_eq!(transform.scale.unwrap(), scale);

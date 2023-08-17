@@ -11,6 +11,7 @@ use crate::{osc::OSCMessage, IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCRe
 ///
 /// Changes the model root absolute position, rotation, and optionally, scale & offset.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RootTransform {
 	pub position: Vector3<f32>,
 	pub rotation: UnitQuaternion<f32>,
@@ -67,6 +68,7 @@ impl IntoOSCMessage for RootTransform {
 ///
 /// <https://github.com/vrm-c/vrm-specification/blob/master/specification/0.0/README.md#defined-bones>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StandardVRM0Bone {
 	Hips,
 	LeftUpperLeg,
@@ -286,6 +288,7 @@ impl PartialEq<StandardVRM0Bone> for String {
 ///
 /// Used to adjust the position and rotation of humanoid bones.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BoneTransform {
 	pub bone: String,
 	pub position: Vector3<f32>,
@@ -317,6 +320,7 @@ impl IntoOSCMessage for BoneTransform {
 
 /// The type of device used in [`DeviceTransform`] (HMD, controller, or independent tracker).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceType {
 	HMD,
 	Controller,
@@ -354,6 +358,7 @@ impl FromStr for DeviceType {
 
 /// Device Transform message (`/VMC/Ext/{Hmd,Con,Tra}/Pos`)
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeviceTransform {
 	pub device: DeviceType,
 	pub joint: String,
@@ -394,6 +399,7 @@ impl IntoOSCMessage for DeviceTransform {
 /// Receivers should be prepared to accept both 1.x and 0.x blend shapes:
 /// <https://protocol.vmc.info/marionette-spec#vrm-blendshapeproxyvalue>
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum StandardVRMBlendShape {
 	Neutral,
 	A,
@@ -496,6 +502,7 @@ impl PartialEq<StandardVRMBlendShape> for String {
 ///
 /// Note that blendshapes will not update until you send [`ApplyBlendShapes`].
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BlendShape {
 	pub key: String,
 	pub value: f32
@@ -518,6 +525,7 @@ impl IntoOSCMessage for BlendShape {
 
 /// Apply Blend Shape message (`/VMC/Ext/Blend/Apply`)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ApplyBlendShapes;
 
 impl IntoOSCMessage for ApplyBlendShapes {
@@ -528,6 +536,7 @@ impl IntoOSCMessage for ApplyBlendShapes {
 
 /// Loading state of the virtual avatar on the sender's side.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(i32)]
 pub enum ModelState {
 	/// The model is not yet loaded or is currently loading.
@@ -555,6 +564,7 @@ impl TryFrom<i32> for ModelState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(i32)]
 pub enum CalibrationState {
 	/// The sender has not yet calibrated tracking.
@@ -588,6 +598,7 @@ impl TryFrom<i32> for CalibrationState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(i32)]
 pub enum CalibrationMode {
 	Normal = 0,
@@ -616,6 +627,7 @@ impl TryFrom<i32> for CalibrationMode {
 
 /// Quality of tracking.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(i32)]
 pub enum TrackingState {
 	/// Tracking is in poor condition (could be due to hitting the edge of the camera's view, or poor lighting)
@@ -646,6 +658,7 @@ impl TryFrom<i32> for TrackingState {
 ///
 /// Used to send information like model, calibration, & tracking status.
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct State {
 	pub model_state: ModelState,
 	pub calibration_state: Option<(CalibrationMode, CalibrationState)>,
@@ -701,6 +714,7 @@ impl IntoOSCMessage for State {
 
 /// Relative Time message (`/VMC/Ext/T`)
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Time(pub f32);
 
 impl Time {
@@ -723,6 +737,7 @@ impl IntoOSCMessage for Time {
 
 /// Contains any possible message that can be sent over VMC protocol.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum VMCMessage {
 	RootTransform(RootTransform),
 	DeviceTransform(DeviceTransform),

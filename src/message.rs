@@ -1,9 +1,8 @@
 //! Submodule for Virtual Motion Capture-specific messages.
 
-use std::{str::FromStr, time::Instant};
+use std::{str::FromStr, sync::OnceLock, time::Instant};
 
 use nalgebra::{Quaternion, Scale3, UnitQuaternion, Vector3};
-use once_cell::sync::Lazy;
 
 use crate::{osc::OSCMessage, IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult};
 
@@ -724,8 +723,8 @@ impl Time {
 
 	/// Creates a new time message, automatically tracking relative time using a monotonic clock.
 	pub fn elapsed() -> Self {
-		static EPOCH: Lazy<Instant> = Lazy::new(Instant::now);
-		Self(EPOCH.elapsed().as_secs_f32())
+		static EPOCH: OnceLock<Instant> = OnceLock::new();
+		Self(EPOCH.get_or_init(Instant::now).elapsed().as_secs_f32())
 	}
 }
 

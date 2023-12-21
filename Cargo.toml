@@ -27,6 +27,8 @@ tokio-stream = "0.1"
 thiserror = "1.0"
 
 [dev-dependencies]
-tokio = { version = "1.30", features = [ "net", "macros", "rt-multi-thread" ] }
+tokio = { version = "1.30", features = [ "net", "macros", "signal", "rt-multi-thread" ] }
 tokio-test = "0.4"
 approx = "0.5"
+rmp-serde = "1.1"
+console = "0.15"

@@ -1,4 +1,4 @@
-use super::{error::OSCResult, OSCBundle, OSCMessage, OSCPacket, OSCTime, OSCType};
+use super::{OSCBundle, OSCMessage, OSCPacket, OSCTime, OSCType, error::OSCResult};
 
 /// Takes a reference to an OSC packet and returns
 /// a byte vector on success. If the packet was invalid
@@ -7,7 +7,7 @@ use super::{error::OSCResult, OSCBundle, OSCMessage, OSCPacket, OSCTime, OSCType
 /// # Example
 ///
 /// ```
-/// use vmc::osc::{encoder, OSCMessage, OSCPacket, OSCType};
+/// use vmc::osc::{OSCMessage, OSCPacket, OSCType, encoder};
 ///
 /// let packet = OSCPacket::Message(OSCMessage {
 /// 	addr: "/greet/me".to_string(),
@@ -39,7 +39,7 @@ pub fn encode(packet: &OSCPacket) -> OSCResult<Vec<u8>> {
 /// # Example
 ///
 /// ```
-/// use vmc::osc::{encoder, OSCMessage, OSCPacket, OSCType};
+/// use vmc::osc::{OSCMessage, OSCPacket, OSCType, encoder};
 ///
 /// let mut bytes = Vec::new();
 /// let packet = OSCPacket::Message(OSCMessage {

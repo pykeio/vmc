@@ -4,7 +4,7 @@ use std::{str::FromStr, sync::OnceLock, time::Instant};
 
 use nalgebra::{Quaternion, Scale3, UnitQuaternion, Vector3};
 
-use crate::{osc::OSCMessage, IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult};
+use crate::{IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult, osc::OSCMessage};
 
 /// Root Transform message (`/VMC/Ext/Root/Pos`)
 ///

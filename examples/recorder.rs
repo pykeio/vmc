@@ -1,6 +1,6 @@
 use std::sync::{
-	atomic::{AtomicBool, Ordering},
-	Arc, RwLock
+	Arc, RwLock,
+	atomic::{AtomicBool, Ordering}
 };
 
 use console::Term;

@@ -4,7 +4,7 @@ use std::{
 	io::{self}
 };
 
-use crate::{osc, OSCType};
+use crate::{OSCType, osc};
 
 #[derive(Debug)]
 pub enum VMCError {

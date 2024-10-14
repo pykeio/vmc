@@ -1,15 +1,15 @@
 use nom::{
+	Err, IResult, Offset,
 	bytes::complete::{take, take_till},
 	combinator::{map, map_parser, map_res},
 	multi::many0,
 	number::complete::{be_f32, be_f64, be_i32, be_i64, be_u32},
-	sequence::{terminated, tuple},
-	Err, IResult, Offset
+	sequence::{terminated, tuple}
 };
 
 use super::{
-	error::{OSCError, OSCResult},
-	OSCArray, OSCBundle, OSCColor, OSCMessage, OSCMidiMessage, OSCPacket, OSCTime, OSCType
+	OSCArray, OSCBundle, OSCColor, OSCMessage, OSCMidiMessage, OSCPacket, OSCTime, OSCType,
+	error::{OSCError, OSCResult}
 };
 
 /// Common MTU size for ethernet

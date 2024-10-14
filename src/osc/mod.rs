@@ -11,9 +11,11 @@ pub mod decoder;
 pub mod encoder;
 pub mod error;
 
-pub use self::decoder::{decode_tcp, decode_tcp_vec, decode_udp, MTU};
-pub use self::encoder::{encode, encode_into, encode_string, encode_string_into};
-pub use self::error::{OSCError, OSCResult};
+pub use self::{
+	decoder::{MTU, decode_tcp, decode_tcp_vec, decode_udp},
+	encoder::{encode, encode_into, encode_string, encode_string_into},
+	error::{OSCError, OSCResult}
+};
 
 /// A time tag in OSC message consists of two 32-bit integers where the first one denotes the number of seconds since
 /// 1900-01-01 and the second the fractions of a second. For details on its semantics see <http://opensoundcontrol.org/node/3/#timetags>

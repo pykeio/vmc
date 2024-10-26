@@ -74,10 +74,7 @@ pub mod message;
 pub mod osc;
 mod udp;
 
-pub use nalgebra::{
-	Scale3, Vector3,
-	geometry::{Quaternion, UnitQuaternion}
-};
+pub use glam::{EulerRot, Quat, Vec3, Vec3A};
 
 use self::udp::UDPSocketStream;
 pub use self::{

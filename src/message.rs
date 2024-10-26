@@ -2,7 +2,7 @@
 
 use std::{str::FromStr, sync::OnceLock, time::Instant};
 
-use nalgebra::{Quaternion, Scale3, UnitQuaternion, Vector3};
+use glam::{Quat, Vec3A};
 
 use crate::{IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult, osc::OSCMessage};
 
@@ -12,15 +12,15 @@ use crate::{IntoOSCMessage, OSCPacket, OSCType, VMCError, VMCResult, osc::OSCMes
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RootTransform {
-	pub position: Vector3<f32>,
-	pub rotation: UnitQuaternion<f32>,
-	pub scale: Option<Scale3<f32>>,
-	pub offset: Option<Vector3<f32>>
+	pub position: Vec3A,
+	pub rotation: Quat,
+	pub scale: Option<Vec3A>,
+	pub offset: Option<Vec3A>
 }
 
 impl RootTransform {
 	/// Creates a new root transform message.
-	pub fn new(position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
+	pub fn new(position: impl Into<Vec3A>, rotation: Quat) -> Self {
 		Self {
 			position: position.into(),
 			rotation,
@@ -31,29 +31,27 @@ impl RootTransform {
 
 	/// Creates a new root transform message with additional scale & offset parameters, which can be used to adjust the
 	/// size and position of the virtual avatar to match the physical body.
-	pub fn new_mr(position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, scale: Scale3<f32>, offset: Vector3<f32>) -> Self {
-		let rotation = rotation.slerp(&rotation, 1.0);
+	pub fn new_mr(position: impl Into<Vec3A>, rotation: Quat, scale: impl Into<Vec3A>, offset: impl Into<Vec3A>) -> Self {
 		Self {
 			position: position.into(),
 			rotation,
-			scale: Some(scale),
-			offset: Some(offset)
+			scale: Some(scale.into()),
+			offset: Some(offset.into())
 		}
 	}
 }
 
 impl IntoOSCMessage for RootTransform {
 	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		let rotation = self.rotation.as_ref();
 		let mut args: Vec<OSCType> = vec![
 			"root".into(),
 			self.position.x.into(),
 			self.position.y.into(),
 			self.position.z.into(),
-			rotation.coords.x.into(),
-			rotation.coords.y.into(),
-			rotation.coords.z.into(),
-			rotation.coords.w.into(),
+			self.rotation.x.into(),
+			self.rotation.y.into(),
+			self.rotation.z.into(),
+			self.rotation.w.into(),
 		];
 		if let (Some(scale), Some(offset)) = (self.scale.as_ref(), self.offset.as_ref()) {
 			args.extend([scale.x.into(), scale.y.into(), scale.z.into()]);
@@ -290,15 +288,15 @@ impl PartialEq<StandardVRM0Bone> for String {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct BoneTransform {
 	pub bone: String,
-	pub position: Vector3<f32>,
-	pub rotation: UnitQuaternion<f32>
+	pub position: Vec3A,
+	pub rotation: Quat
 }
 
 impl BoneTransform {
 	/// Creates a new bone transform message.
 	///
 	/// `bone` is the name of the bone; see [`StandardVRM0Bone`] for standard VRM 0.x bone names.
-	pub fn new(bone: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>) -> Self {
+	pub fn new(bone: impl ToString, position: impl Into<Vec3A>, rotation: Quat) -> Self {
 		Self {
 			bone: bone.to_string(),
 			position: position.into(),
@@ -309,10 +307,9 @@ impl BoneTransform {
 
 impl IntoOSCMessage for BoneTransform {
 	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		let rotation = self.rotation.as_ref();
 		OSCMessage::new(
 			"/VMC/Ext/Bone/Pos",
-			(self.bone, self.position.x, self.position.y, self.position.z, rotation.coords.x, rotation.coords.y, rotation.coords.z, rotation.coords.w)
+			(self.bone, self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
 		)
 	}
 }
@@ -361,8 +358,8 @@ impl FromStr for DeviceType {
 pub struct DeviceTransform {
 	pub device: DeviceType,
 	pub joint: String,
-	pub position: Vector3<f32>,
-	pub rotation: UnitQuaternion<f32>,
+	pub position: Vec3A,
+	pub rotation: Quat,
 	pub local: bool
 }
 
@@ -371,7 +368,7 @@ impl DeviceTransform {
 	///
 	/// - `joint` is the OpenVR serial no.
 	/// - `local` determines whether the position is in raw device scale (`true`) or avatar scale (`false`).
-	pub fn new(device: DeviceType, joint: impl ToString, position: impl Into<Vector3<f32>>, rotation: UnitQuaternion<f32>, local: bool) -> Self {
+	pub fn new(device: DeviceType, joint: impl ToString, position: impl Into<Vec3A>, rotation: Quat, local: bool) -> Self {
 		Self {
 			device,
 			joint: joint.to_string(),
@@ -384,10 +381,9 @@ impl DeviceTransform {
 
 impl IntoOSCMessage for DeviceTransform {
 	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		let rotation = self.rotation.as_ref();
 		OSCMessage::new(
 			format!("/VMC/Ext/{}/Pos{}", self.device.as_ref(), if self.local { "/Local" } else { "" }),
-			(self.joint, self.position.x, self.position.y, self.position.z, rotation.coords.x, rotation.coords.y, rotation.coords.z, rotation.coords.w)
+			(self.joint, self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
 		)
 	}
 }
@@ -823,10 +819,7 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					OSCType::Float(r_z),
 					OSCType::Float(r_w)
 				]
-			) => Ok(VMCMessage::RootTransform(RootTransform::new(
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z))
-			))),
+			) => Ok(VMCMessage::RootTransform(RootTransform::new(Vec3A::new(p_x, p_y, p_z), Quat::from_array([r_x, r_y, r_z, r_w])))),
 			(
 				"/VMC/Ext/Root/Pos",
 				&[
@@ -847,10 +840,10 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 					..
 				]
 			) => Ok(VMCMessage::RootTransform(RootTransform::new_mr(
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
-				Scale3::new(s_x, s_y, s_z),
-				Vector3::new(o_x, o_y, o_z)
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
+				Vec3A::new(s_x, s_y, s_z),
+				Vec3A::new(o_x, o_y, o_z)
 			))),
 			(
 				"/VMC/Ext/Bone/Pos",
@@ -866,8 +859,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 				]
 			) => Ok(VMCMessage::BoneTransform(BoneTransform::new(
 				StandardVRM0Bone::from_str(bone).map_err(|_| VMCError::UnknownBone(bone.to_string()))?,
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z))
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w])
 			))),
 			(
 				"/VMC/Ext/Hmd/Pos",
@@ -885,8 +878,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::HMD,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				false
 			))),
 			(
@@ -905,8 +898,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::HMD,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				true
 			))),
 			(
@@ -925,8 +918,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Controller,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				false
 			))),
 			(
@@ -945,8 +938,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Controller,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				true
 			))),
 			(
@@ -965,8 +958,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Tracker,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				false
 			))),
 			(
@@ -985,8 +978,8 @@ pub fn parse(osc_packet: OSCPacket) -> VMCResult<Vec<VMCMessage>> {
 			) => Ok(VMCMessage::DeviceTransform(DeviceTransform::new(
 				DeviceType::Tracker,
 				joint.to_owned(),
-				Vector3::new(p_x, p_y, p_z),
-				UnitQuaternion::new_unchecked(Quaternion::new(r_w, r_x, r_y, r_z)),
+				Vec3A::new(p_x, p_y, p_z),
+				Quat::from_array([r_x, r_y, r_z, r_w]),
 				true
 			))),
 			("/VMC/Ext/Blend/Val", &[OSCType::String(ref shape), OSCType::Float(val), ..]) => Ok(VMCMessage::BlendShape(BlendShape::new(shape, val))),
@@ -1029,10 +1022,10 @@ mod tests {
 
 	#[test]
 	fn test_parse_root_transform() -> VMCResult<()> {
-		let position = Vector3::new(0.5, 0.2, -0.4);
-		let rotation = UnitQuaternion::new_normalize(Quaternion::new(1.0, 2.0, 3.0, 4.0));
-		let scale = Scale3::new(0.8, 1.0, 0.3);
-		let offset = Vector3::new(-0.1, 0.12, -0.3);
+		let position = Vec3A::new(0.5, 0.2, -0.4);
+		let rotation = Quat::from_array([1.0, 2.0, 3.0, 4.0]).normalize();
+		let scale = Vec3A::new(0.8, 1.0, 0.3);
+		let offset = Vec3A::new(-0.1, 0.12, -0.3);
 
 		let packet = RootTransform::new(position, rotation).into_osc_packet();
 		let parsed_packet = &parse(packet)?[0];
@@ -1063,8 +1056,8 @@ mod tests {
 
 	#[test]
 	fn test_parse_bone_transform() -> VMCResult<()> {
-		let position = Vector3::new(0.5, 0.2, -0.4);
-		let rotation = UnitQuaternion::new_normalize(Quaternion::new(1.0, 2.0, 3.0, 4.0));
+		let position = Vec3A::new(0.5, 0.2, -0.4);
+		let rotation = Quat::from_array([1.0, 2.0, 3.0, 4.0]).normalize();
 
 		for bone in [
 			StandardVRM0Bone::Chest,
@@ -1090,8 +1083,8 @@ mod tests {
 
 	#[test]
 	fn test_parse_device_transform() -> VMCResult<()> {
-		let position = Vector3::new(0.5, 0.2, -0.4);
-		let rotation = UnitQuaternion::new_normalize(Quaternion::new(1.0, 2.0, 3.0, 4.0));
+		let position = Vec3A::new(0.5, 0.2, -0.4);
+		let rotation = Quat::from_array([1.0, 2.0, 3.0, 4.0]).normalize();
 
 		for device in [DeviceType::HMD, DeviceType::Controller, DeviceType::Tracker] {
 			for joint in ["Head", "LeftHand"] {

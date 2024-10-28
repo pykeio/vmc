@@ -1,9 +1,9 @@
 [package]
 name = "vmc"
-version = "0.3.0"
+version = "0.4.0"
 license = "MIT OR Apache-2.0"
 description = "Implementation of Virtual Motion Capture protocol for virtual avatar tracking."
-repository = "https://github.com/vitri-ent/vmc"
+repository = "https://github.com/pykeio/vmc"
 documentation = "https://docs.rs/vmc"
 readme = "README.md"
 edition = "2021"

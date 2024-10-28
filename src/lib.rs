@@ -27,7 +27,7 @@
 //!
 //! ### Marionette
 //! ```no_run
-//! use tokio_stream::StreamExt;
+//! use futures_util::StreamExt;
 //! use vmc::{VMCMessage, VMCResult};
 //!
 //! #[tokio::main]

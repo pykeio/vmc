@@ -8,8 +8,8 @@ use std::{
 	task::{Context, Poll}
 };
 
+use futures_core::Stream;
 use tokio::net::UdpSocket;
-use tokio_stream::Stream;
 
 pub(crate) type RecvFuture = Pin<Box<dyn Future<Output = io::Result<(Vec<u8>, usize, SocketAddr)>> + Send + Sync>>;
 

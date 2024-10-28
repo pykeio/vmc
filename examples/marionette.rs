@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use tokio_stream::StreamExt;
+use futures_util::StreamExt;
 use vmc::{VMCMessage, VMCModelState, VMCResult};
 
 #[tokio::main]

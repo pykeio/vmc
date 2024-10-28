@@ -4,8 +4,8 @@ use std::sync::{
 };
 
 use console::Term;
+use futures_util::StreamExt;
 use serde::Serialize;
-use tokio_stream::StreamExt;
 use vmc::{VMCMessage, VMCResult};
 
 #[derive(Default, Serialize)]

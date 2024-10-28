@@ -66,8 +66,8 @@ use std::{
 	task::{Context, Poll}
 };
 
+use futures_core::Stream;
 use tokio::net::{ToSocketAddrs, UdpSocket};
-use tokio_stream::Stream;
 
 mod error;
 pub mod message;

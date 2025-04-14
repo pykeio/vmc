@@ -58,15 +58,15 @@ use std::{
 use futures_core::Stream;
 use tokio::net::{ToSocketAddrs, UdpSocket};
 
+mod definitions;
 mod error;
 pub mod message;
 pub mod osc;
 mod udp;
 
-pub use glam::{EulerRot, Quat, Vec3, Vec3A};
-
 use self::udp::UDPSocketStream;
 pub use self::{
+	definitions::{Quat, Vec3},
 	error::{VMCError, VMCResult},
 	message::{
 		ApplyBlendShapes as VMCApplyBlendShapes, BlendShape as VMCBlendShape, BoneTransform as VMCBoneTransform, CalibrationMode as VMCCalibrationMode,

@@ -32,20 +32,17 @@ pub use self::{
 ///
 /// # Conversions between [`std::time::SystemTime`]
 ///
-/// The traits in `std::convert` are implemented for converting between
-/// [`SystemTime`](std::time::SystemTime) and `OSCTime` in both directions. An `OSCTime` can be
-/// converted into a `SystemTime` using [`From`](std::convert::From)/[`Into`](std::convert::Into).
-/// A `SystemTime` can be converted into an `OSCTime` using
-/// [`TryFrom`](std::convert::TryFrom)/[`TryInto`](std::convert::TryInto). The fallible variants of
-/// the conversion traits are used this case because not every `SystemTime` can be represented as
-/// an `OSCTime`.
+/// The traits in `std::convert` are implemented for converting between [`SystemTime`] and `OSCTime` in both directions.
+/// An `OSCTime` can be converted into a `SystemTime` using [`From`]/[`Into`] A `SystemTime` can be converted into an
+/// `OSCTime` using [`TryFrom`]/[`TryInto`]. The fallible variants of the conversion traits are used this case because
+/// not every `SystemTime` can be represented as an `OSCTime`.
 ///
 /// **These conversions are lossy**, but are tested to have a deviation within
 /// 5 nanoseconds when converted back and forth in either direction.
 ///
 /// Although any time since the OSC epoch (`1900-01-01 00:00:00 UTC`) can be represented using the
 /// OSC timestamp format, this crate only allows conversions between times greater than or equal to
-/// the [`UNIX_EPOCH`](std::time::UNIX_EPOCH). This allows the math used in the conversions to work
+/// the [`UNIX_EPOCH`]. This allows the math used in the conversions to work
 /// on 32-bit systems which cannot represent times that far back.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct OSCTime {

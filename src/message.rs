@@ -353,7 +353,7 @@ fn flatten_packet(packet: OscPacket) -> Vec<OscMessage> {
 	}
 }
 
-/// Parses an [`OSCPacket`] into its contained VMC [`Message`]s. This will automatically flatten message bundles and
+/// Parses an [`OscPacket`] into its contained VMC [`Message`]s. This will automatically flatten message bundles and
 /// handle the parsing to different message types. Returns an error upon encountering an unimplemented packet.
 pub fn parse(osc_packet: OscPacket) -> Result<Vec<Message>> {
 	let messages = flatten_packet(osc_packet);

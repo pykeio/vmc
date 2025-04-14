@@ -1,8 +1,6 @@
 # `vmc`
 An asynchronous implementation of the [Virtual Motion Capture Protocol](https://protocol.vmc.info/) in Rust.
 
-While this crate is intended specifically for Virtual Motion Capture, it can also be used as an implementation of the [Open Sound Control](https://opensoundcontrol.stanford.edu/) protocol which VMC is based on.
-
 ## Examples
 See [`examples/`](https://github.com/vitri-ent/vmc/tree/main/examples/) for more detailed examples.
 
@@ -51,4 +49,4 @@ async fn main() -> VMCResult<()> {
 ```
 
 ## License
-❤️ This package is based on [`rosc`](https://github.com/klingtnet/rosc/blob/master/Cargo.toml) by Andreas Linz and [`async-osc`](https://github.com/Frando/async-osc) by Franz Heinzmann. Licensed under MIT License or Apache-2.0.
+❤️ This crate is based on [`rosc`](https://github.com/klingtnet/rosc) by Andreas Linz and [`async-osc`](https://github.com/Frando/async-osc) by Franz Heinzmann. Licensed under MIT License or Apache-2.0.

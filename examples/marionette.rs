@@ -1,33 +1,33 @@
 use std::collections::HashMap;
 
 use futures_util::StreamExt;
-use vmc::{VMCMessage, VMCModelState, VMCResult};
+use vmc::{Message, ModelState};
 
 #[tokio::main]
-async fn main() -> VMCResult<()> {
+async fn main() -> vmc::Result<()> {
 	let mut socket = vmc::marionette!("127.0.0.1:39539").await?;
 	let mut blendshapes = HashMap::new();
 	while let Some(packet) = socket.next().await {
 		let (packet, _) = packet?;
 		for message in vmc::parse(packet)? {
 			match message {
-				VMCMessage::BoneTransform(transform) => {
+				Message::BoneTransform(transform) => {
 					println!("\tTransform bone: {} (pos {:?}; rot {:?})", transform.bone, transform.position, transform.rotation)
 				}
-				VMCMessage::DeviceTransform(transform) => {
+				Message::DeviceTransform(transform) => {
 					println!("\tTransform device ({:?}): {} (pos {:?}; rot {:?})", transform.device, transform.joint, transform.position, transform.rotation)
 				}
-				VMCMessage::RootTransform(transform) => {
+				Message::RootTransform(transform) => {
 					println!("\tTransform root: (pos {:?}; rot {:?})", transform.position, transform.rotation)
 				}
-				VMCMessage::State(t) => match t.model_state {
-					VMCModelState::Loaded => println!("\tModel is loaded."),
-					VMCModelState::NotLoaded => println!("\tModel is not yet loaded.")
+				Message::State(t) => match t.model_state {
+					ModelState::Loaded => println!("\tModel is loaded."),
+					ModelState::NotLoaded => println!("\tModel is not yet loaded.")
 				},
-				VMCMessage::BlendShape(blend) => {
+				Message::BlendShape(blend) => {
 					blendshapes.insert(blend.key, blend.value);
 				}
-				VMCMessage::ApplyBlendShapes => {
+				Message::ApplyBlendShapes => {
 					if !blendshapes.is_empty() {
 						println!(
 							"\tBlend shape: {}",
@@ -41,7 +41,7 @@ async fn main() -> VMCResult<()> {
 						blendshapes.clear();
 					}
 				}
-				VMCMessage::Time(t) => println!("Render all (time: {})", t.0)
+				Message::Time(t) => println!("Render all (time: {})", t.0)
 			}
 		}
 	}

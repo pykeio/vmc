@@ -6,20 +6,16 @@ See [`examples/`](https://github.com/vitri-ent/vmc/tree/main/examples/) for more
 
 ### Performer
 ```rs
-use vmc::{
-	VMCApplyBlendShapes, VMCBlendShape, VMCModelState, VMCResult, VMCStandardVRMBlendShape, VMCState, VMCTime
-};
+use vmc::{ApplyBlendShapes, BlendShape, ModelState, StandardVRMBlendShape, State, Time};
 
 #[tokio::main]
-async fn main() -> VMCResult<()> {
+async fn main() -> vmc::Result<()> {
 	let socket = vmc::performer!("127.0.0.1:39539").await?;
 	loop {
-		socket
-			.send(VMCBlendShape::new(VMCStandardVRMBlendShape::Joy, 1.0))
-			.await?;
-		socket.send(VMCApplyBlendShapes).await?;
-		socket.send(VMCState::new(VMCModelState::Loaded)).await?;
-		socket.send(VMCTime::elapsed()).await?;
+		socket.send(BlendShape::new(StandardVRMBlendShape::Joy, 1.0)).await?;
+		socket.send(ApplyBlendShapes).await?;
+		socket.send(State::new(ModelState::Loaded)).await?;
+		socket.send(Time::elapsed()).await?;
 	}
 }
 ```
@@ -27,16 +23,16 @@ async fn main() -> VMCResult<()> {
 ### Marionette
 ```rs
 use tokio_stream::StreamExt;
-use vmc::{VMCMessage, VMCResult};
+use vmc::Message;
 
 #[tokio::main]
-async fn main() -> VMCResult<()> {
+async fn main() -> vmc::Result<()> {
 	let mut socket = vmc::marionette!("127.0.0.1:39539").await?;
 	while let Some(packet) = socket.next().await {
 		let (packet, _) = packet?;
 		for message in vmc::parse(packet)? {
 			match message {
-				VMCMessage::BoneTransform(transform) => {
+				Message::BoneTransform(transform) => {
 					println!("\tTransform bone: {} (pos {:?}; rot {:?})", transform.bone, transform.position, transform.rotation)
 				}
 				_ => {}

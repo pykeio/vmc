@@ -6,16 +6,16 @@ use std::sync::{
 use console::Term;
 use futures_util::StreamExt;
 use serde::Serialize;
-use vmc::{VMCMessage, VMCResult};
+use vmc::{Message, Result};
 
 #[derive(Default, Serialize)]
 struct MessageBundle {
 	time_delta: f32,
-	messages: Vec<VMCMessage>
+	messages: Vec<Message>
 }
 
 #[tokio::main]
-async fn main() -> VMCResult<()> {
+async fn main() -> Result<()> {
 	let mut socket = vmc::marionette!("127.0.0.1:39539").await?;
 
 	tokio::spawn(async move {
@@ -51,7 +51,7 @@ async fn main() -> VMCResult<()> {
 		for message in vmc::parse(packet)? {
 			if active.load(Ordering::Relaxed) {
 				match message {
-					VMCMessage::Time(t) => {
+					Message::Time(t) => {
 						{
 							let mut packet_buffer = packet_buffer.write().unwrap();
 							packet_buffer.push(current_packet);

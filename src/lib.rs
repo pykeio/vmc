@@ -2,18 +2,16 @@
 //!
 //! ### Performer
 //! ```no_run
-//! use vmc::{
-//! 	VMCApplyBlendShapes, VMCBlendShape, VMCModelState, VMCResult, VMCStandardVRMBlendShape, VMCState, VMCTime
-//! };
+//! use vmc::{ApplyBlendShapes, BlendShape, ModelState, StandardVRMBlendShape, State, Time};
 //!
 //! #[tokio::main]
-//! async fn main() -> VMCResult<()> {
+//! async fn main() -> vmc::Result<()> {
 //! 	let socket = vmc::performer!("127.0.0.1:39539").await?;
 //! 	loop {
-//! 		socket.send(VMCBlendShape::new(VMCStandardVRMBlendShape::Joy, 1.0)).await?;
-//! 		socket.send(VMCApplyBlendShapes).await?;
-//! 		socket.send(VMCState::new(VMCModelState::Loaded)).await?;
-//! 		socket.send(VMCTime::elapsed()).await?;
+//! 		socket.send(BlendShape::new(StandardVRMBlendShape::Joy, 1.0)).await?;
+//! 		socket.send(ApplyBlendShapes).await?;
+//! 		socket.send(State::new(ModelState::Loaded)).await?;
+//! 		socket.send(Time::elapsed()).await?;
 //! 	}
 //! }
 //! ```
@@ -21,16 +19,16 @@
 //! ### Marionette
 //! ```no_run
 //! use futures_util::StreamExt;
-//! use vmc::{VMCMessage, VMCResult};
+//! use vmc::Message;
 //!
 //! #[tokio::main]
-//! async fn main() -> VMCResult<()> {
+//! async fn main() -> vmc::Result<()> {
 //! 	let mut socket = vmc::marionette!("127.0.0.1:39539").await?;
 //! 	while let Some(packet) = socket.next().await {
 //! 		let (packet, _) = packet?;
 //! 		for message in vmc::parse(packet)? {
 //! 			match message {
-//! 				VMCMessage::BoneTransform(transform) => {
+//! 				Message::BoneTransform(transform) => {
 //! 					println!(
 //! 						"\tTransform bone: {} (pos {:?}; rot {:?})",
 //! 						transform.bone, transform.position, transform.rotation
@@ -64,17 +62,14 @@ pub mod message;
 pub mod osc;
 mod udp;
 
-use self::udp::UDPSocketStream;
 pub use self::{
-	definitions::{Quat, Vec3},
-	error::{VMCError, VMCResult},
-	message::{
-		ApplyBlendShapes as VMCApplyBlendShapes, BlendShape as VMCBlendShape, BoneTransform as VMCBoneTransform, CalibrationMode as VMCCalibrationMode,
-		CalibrationState as VMCCalibrationState, DeviceTransform as VMCDeviceTransform, DeviceType as VMCDeviceType, ModelState as VMCModelState,
-		RootTransform as VMCRootTransform, StandardVRM0Bone as VMCStandardVRM0Bone, StandardVRMBlendShape as VMCStandardVRMBlendShape, State as VMCState,
-		Time as VMCTime, TrackingState as VMCTrackingState, VMCMessage, parse
-	},
-	osc::{IntoOSCArgs, IntoOSCMessage, IntoOSCPacket, OSCPacket, OSCType}
+	definitions::*,
+	error::{Error, Result},
+	message::{ApplyBlendShapes, BlendShape, BoneTransform, DeviceTransform, Message, RootTransform, State, Time, parse}
+};
+use self::{
+	osc::{IntoOSCPacket, OSCPacket},
+	udp::UDPSocketStream
 };
 
 /// A UDP socket to send and receive VMC messages.
@@ -96,7 +91,7 @@ impl VMCSocket {
 	/// The port allocated can be queried via [`local_addr`] method.
 	///
 	/// [`local_addr`]: #method.local_addr
-	pub async fn bind<A: ToSocketAddrs>(addr: A) -> VMCResult<Self> {
+	pub async fn bind<A: ToSocketAddrs>(addr: A) -> Result<Self> {
 		let socket = UdpSocket::bind(addr).await?;
 		Ok(Self::new(socket))
 	}
@@ -111,14 +106,14 @@ impl VMCSocket {
 	/// # Examples
 	///
 	/// ```no_run
-	/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
+	/// # fn main() -> vmc::Result<()> { tokio_test::block_on(async {
 	/// use vmc::VMCSocket;
 	///
 	/// let socket = VMCSocket::bind("127.0.0.1:0").await?;
 	/// socket.connect("127.0.0.1:8080").await?;
 	/// # Ok(()) }) }
 	/// ```
-	pub async fn connect<A: ToSocketAddrs>(&self, addrs: A) -> VMCResult<()> {
+	pub async fn connect<A: ToSocketAddrs>(&self, addrs: A) -> Result<()> {
 		self.socket().connect(addrs).await?;
 		Ok(())
 	}
@@ -128,16 +123,16 @@ impl VMCSocket {
 	/// # Examples
 	///
 	/// ```no_run
-	/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
-	/// use vmc::{VMCBlendShape, VMCSocket, VMCStandardVRMBlendShape};
+	/// # fn main() -> vmc::Result<()> { tokio_test::block_on(async {
+	/// use vmc::{BlendShape, StandardVRMBlendShape, VMCSocket};
 	///
 	/// let socket = VMCSocket::bind("127.0.0.1:0").await?;
 	/// let addr = "127.0.0.1:39539";
-	/// let message = VMCBlendShape::new(VMCStandardVRMBlendShape::Joy, 1.0);
+	/// let message = BlendShape::new(StandardVRMBlendShape::Joy, 1.0);
 	/// socket.send_to(message, &addr).await?;
 	/// # Ok(()) }) }
 	/// ```
-	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> VMCResult<()> {
+	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> Result<()> {
 		let buf = self::osc::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send_to(&buf[..], addrs).await?;
 		check_len(&buf[..], n)
@@ -153,16 +148,16 @@ impl VMCSocket {
 	/// # Examples
 	///
 	/// ```no_run
-	/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
-	/// use vmc::{VMCBlendShape, VMCSocket, VMCStandardVRMBlendShape};
+	/// # fn main() -> vmc::Result<()> { tokio_test::block_on(async {
+	/// use vmc::{BlendShape, StandardVRMBlendShape, VMCSocket};
 	///
 	/// let socket = VMCSocket::bind("127.0.0.1:2434").await?;
 	/// socket.connect("127.0.0.1:39539").await?;
-	/// socket.send(VMCBlendShape::new(VMCStandardVRMBlendShape::Joy, 1.0)).await?;
+	/// socket.send(BlendShape::new(StandardVRMBlendShape::Joy, 1.0)).await?;
 	/// #
 	/// # Ok(()) }) }
 	/// ```
-	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> VMCResult<()> {
+	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> Result<()> {
 		let buf = self::osc::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send(&buf[..]).await?;
 		check_len(&buf[..], n)
@@ -184,14 +179,14 @@ impl VMCSocket {
 	///
 	/// This can be useful, for example, when binding to port 0 to figure out which port was
 	/// actually bound.
-	pub fn local_addr(&self) -> VMCResult<SocketAddr> {
+	pub fn local_addr(&self) -> Result<SocketAddr> {
 		let addr = self.socket().local_addr()?;
 		Ok(addr)
 	}
 }
 
 impl Stream for VMCSocket {
-	type Item = VMCResult<(OSCPacket, SocketAddr)>;
+	type Item = Result<(OSCPacket, SocketAddr)>;
 	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
 		let packet = match Pin::new(&mut self.socket).poll_next(cx) {
 			Poll::Ready(packet) => packet,
@@ -221,7 +216,7 @@ impl VMCSender {
 	/// Sends a VMC packet on the socket to the given address.
 	///
 	/// See [`VMCSocket::send_to`].
-	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> VMCResult<()> {
+	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> Result<()> {
 		let buf = self::osc::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send_to(&buf[..], addrs).await?;
 		check_len(&buf[..], n)
@@ -230,7 +225,7 @@ impl VMCSender {
 	/// Sends a VMC packet on the connected socket.
 	///
 	/// See [`VMCSocket::send`].
-	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> VMCResult<()> {
+	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> Result<()> {
 		let buf = self::osc::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send(&buf[..]).await?;
 		check_len(&buf[..], n)
@@ -250,7 +245,7 @@ impl VMCSender {
 ///
 /// The behavior of both binding and sending can be customized:
 /// ```no_run
-/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
+/// # fn main() -> vmc::Result<()> { tokio_test::block_on(async {
 /// // default; binds to random port, sends to 127.0.0.1:39539
 /// let performer = vmc::performer!().await?;
 /// // customize bound port
@@ -286,7 +281,7 @@ macro_rules! performer {
 }
 
 #[doc(hidden)]
-pub async fn _create_performer(bind: impl ToSocketAddrs, addr: impl ToSocketAddrs) -> VMCResult<VMCSocket> {
+pub async fn _create_performer(bind: impl ToSocketAddrs, addr: impl ToSocketAddrs) -> Result<VMCSocket> {
 	let socket = VMCSocket::bind(bind).await?;
 	socket.connect(addr).await?;
 	Ok(socket)
@@ -299,7 +294,7 @@ pub async fn _create_performer(bind: impl ToSocketAddrs, addr: impl ToSocketAddr
 ///
 /// The binding address can also be customized:
 /// ```no_run
-/// # fn main() -> vmc::VMCResult<()> { tokio_test::block_on(async {
+/// # fn main() -> vmc::Result<()> { tokio_test::block_on(async {
 /// // default; binds to 127.0.0.1:39539
 /// let marionette = vmc::marionette!().await?;
 /// // customize bind address/port
@@ -317,12 +312,12 @@ macro_rules! marionette {
 }
 
 #[doc(hidden)]
-pub async fn _create_marionette(addr: impl ToSocketAddrs) -> VMCResult<VMCSocket> {
+pub async fn _create_marionette(addr: impl ToSocketAddrs) -> Result<VMCSocket> {
 	let socket = VMCSocket::bind(addr).await?;
 	Ok(socket)
 }
 
-fn check_len(buf: &[u8], len: usize) -> VMCResult<()> {
+fn check_len(buf: &[u8], len: usize) -> Result<()> {
 	if len != buf.len() {
 		Err(io::Error::new(io::ErrorKind::Interrupted, "UDP packet not fully sent").into())
 	} else {

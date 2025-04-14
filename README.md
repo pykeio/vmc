@@ -45,4 +45,4 @@ async fn main() -> vmc::Result<()> {
 ```
 
 ## License
-❤️ This crate is based on [`rosc`](https://github.com/klingtnet/rosc) by Andreas Linz and [`async-osc`](https://github.com/Frando/async-osc) by Franz Heinzmann. Licensed under MIT License or Apache-2.0.
+❤️ This crate is based on [`async-osc`](https://github.com/Frando/async-osc) by Franz Heinzmann. Licensed under MIT License or Apache-2.0.

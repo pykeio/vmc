@@ -2,10 +2,11 @@
 
 use std::{str::FromStr, sync::OnceLock, time::Instant};
 
+use rosc::{OscMessage, OscPacket, OscType};
+
 use crate::{
-	Error, Result,
-	definitions::{CalibrationMode, CalibrationState, DeviceType, ModelState, Quat, StandardVRM0Bone, TrackingState, Vec3},
-	osc::{IntoOSCMessage, OSCMessage, OSCPacket, OSCType}
+	Error, IntoOSCMessage, Result,
+	definitions::{CalibrationMode, CalibrationState, DeviceType, ModelState, Quat, StandardVRM0Bone, TrackingState, Vec3}
 };
 
 /// Root Transform message (`/VMC/Ext/Root/Pos`)
@@ -44,8 +45,8 @@ impl RootTransform {
 }
 
 impl IntoOSCMessage for RootTransform {
-	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		let mut args: Vec<OSCType> = vec![
+	fn into_osc_message(self) -> OscMessage {
+		let mut args: Vec<OscType> = vec![
 			"root".into(),
 			self.position.x.into(),
 			self.position.y.into(),
@@ -59,7 +60,10 @@ impl IntoOSCMessage for RootTransform {
 			args.extend([scale.x.into(), scale.y.into(), scale.z.into()]);
 			args.extend([offset.x.into(), offset.y.into(), offset.z.into()]);
 		}
-		OSCMessage::new("/VMC/Ext/Root/Pos", args)
+		OscMessage {
+			addr: "/VMC/Ext/Root/Pos".to_string(),
+			args
+		}
 	}
 }
 
@@ -88,11 +92,20 @@ impl BoneTransform {
 }
 
 impl IntoOSCMessage for BoneTransform {
-	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		OSCMessage::new(
-			"/VMC/Ext/Bone/Pos",
-			(self.bone, self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
-		)
+	fn into_osc_message(self) -> OscMessage {
+		OscMessage {
+			addr: "/VMC/Ext/Bone/Pos".to_string(),
+			args: vec![
+				OscType::String(self.bone),
+				OscType::Float(self.position.x),
+				OscType::Float(self.position.y),
+				OscType::Float(self.position.z),
+				OscType::Float(self.rotation.x),
+				OscType::Float(self.rotation.y),
+				OscType::Float(self.rotation.z),
+				OscType::Float(self.rotation.w),
+			]
+		}
 	}
 }
 
@@ -124,11 +137,20 @@ impl DeviceTransform {
 }
 
 impl IntoOSCMessage for DeviceTransform {
-	fn into_osc_message(self) -> crate::osc::OSCMessage {
-		OSCMessage::new(
-			format!("/VMC/Ext/{}/Pos{}", self.device.as_ref(), if self.local { "/Local" } else { "" }),
-			(self.joint, self.position.x, self.position.y, self.position.z, self.rotation.x, self.rotation.y, self.rotation.z, self.rotation.w)
-		)
+	fn into_osc_message(self) -> OscMessage {
+		OscMessage {
+			addr: format!("/VMC/Ext/{}/Pos{}", self.device.as_ref(), if self.local { "/Local" } else { "" }),
+			args: vec![
+				OscType::String(self.joint),
+				OscType::Float(self.position.x),
+				OscType::Float(self.position.y),
+				OscType::Float(self.position.z),
+				OscType::Float(self.rotation.x),
+				OscType::Float(self.rotation.y),
+				OscType::Float(self.rotation.z),
+				OscType::Float(self.rotation.w),
+			]
+		}
 	}
 }
 
@@ -152,8 +174,11 @@ impl BlendShape {
 }
 
 impl IntoOSCMessage for BlendShape {
-	fn into_osc_message(self) -> OSCMessage {
-		OSCMessage::new("/VMC/Ext/Blend/Val", (self.key, self.value))
+	fn into_osc_message(self) -> OscMessage {
+		OscMessage {
+			addr: "/VMC/Ext/Blend/Val".to_string(),
+			args: vec![OscType::String(self.key), OscType::Float(self.value)]
+		}
 	}
 }
 
@@ -163,8 +188,11 @@ impl IntoOSCMessage for BlendShape {
 pub struct ApplyBlendShapes;
 
 impl IntoOSCMessage for ApplyBlendShapes {
-	fn into_osc_message(self) -> OSCMessage {
-		OSCMessage::new("/VMC/Ext/Blend/Apply", ())
+	fn into_osc_message(self) -> OscMessage {
+		OscMessage {
+			addr: "/VMC/Ext/Blend/Apply".to_string(),
+			args: Vec::new()
+		}
 	}
 }
 
@@ -214,15 +242,18 @@ impl State {
 }
 
 impl IntoOSCMessage for State {
-	fn into_osc_message(self) -> OSCMessage {
-		let mut args: Vec<OSCType> = vec![self.model_state.into()];
+	fn into_osc_message(self) -> OscMessage {
+		let mut args: Vec<OscType> = vec![self.model_state.into()];
 		if let Some((calibration_mode, calibration_state)) = self.calibration_state {
 			args.extend([calibration_state.into(), calibration_mode.into()]);
 			if let Some(tracking_state) = self.tracking_state {
 				args.push(tracking_state.into());
 			}
 		}
-		OSCMessage::new("/VMC/Ext/OK", args)
+		OscMessage {
+			addr: "/VMC/Ext/OK".to_string(),
+			args
+		}
 	}
 }
 
@@ -244,8 +275,11 @@ impl Time {
 }
 
 impl IntoOSCMessage for Time {
-	fn into_osc_message(self) -> OSCMessage {
-		OSCMessage::new("/VMC/Ext/T", (self.0,))
+	fn into_osc_message(self) -> OscMessage {
+		OscMessage {
+			addr: "/VMC/Ext/T".to_string(),
+			args: vec![OscType::Float(self.0)]
+		}
 	}
 }
 
@@ -263,7 +297,7 @@ pub enum Message {
 }
 
 impl IntoOSCMessage for Message {
-	fn into_osc_message(self) -> OSCMessage {
+	fn into_osc_message(self) -> OscMessage {
 		match self {
 			Self::RootTransform(p) => p.into_osc_message(),
 			Self::DeviceTransform(p) => p.into_osc_message(),
@@ -312,50 +346,50 @@ impl From<Time> for Message {
 	}
 }
 
-fn flatten_packet(packet: OSCPacket) -> Vec<OSCMessage> {
+fn flatten_packet(packet: OscPacket) -> Vec<OscMessage> {
 	match packet {
-		OSCPacket::Bundle(bundle) => bundle.content.into_iter().flat_map(flatten_packet).collect(),
-		OSCPacket::Message(message) => vec![message]
+		OscPacket::Bundle(bundle) => bundle.content.into_iter().flat_map(flatten_packet).collect(),
+		OscPacket::Message(message) => vec![message]
 	}
 }
 
 /// Parses an [`OSCPacket`] into its contained VMC [`Message`]s. This will automatically flatten message bundles and
 /// handle the parsing to different message types. Returns an error upon encountering an unimplemented packet.
-pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
+pub fn parse(osc_packet: OscPacket) -> Result<Vec<Message>> {
 	let messages = flatten_packet(osc_packet);
 	messages
 		.into_iter()
-		.map(|msg| match msg.as_tuple() {
+		.map(|msg| match (&*msg.addr, &*msg.args) {
 			(
 				"/VMC/Ext/Root/Pos",
 				&[
-					OSCType::String(_),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OscType::String(_),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w)
 				]
 			) => Ok(Message::RootTransform(RootTransform::new(Vec3::new(p_x, p_y, p_z), Quat::from_xyzw(r_x, r_y, r_z, r_w)))),
 			(
 				"/VMC/Ext/Root/Pos",
 				&[
-					OSCType::String(_),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
-					OSCType::Float(s_x),
-					OSCType::Float(s_y),
-					OSCType::Float(s_z),
-					OSCType::Float(o_x),
-					OSCType::Float(o_y),
-					OSCType::Float(o_z),
+					OscType::String(_),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
+					OscType::Float(s_x),
+					OscType::Float(s_y),
+					OscType::Float(s_z),
+					OscType::Float(o_x),
+					OscType::Float(o_y),
+					OscType::Float(o_z),
 					..
 				]
 			) => Ok(Message::RootTransform(RootTransform::new_mr(
@@ -367,14 +401,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Bone/Pos",
 				&[
-					OSCType::String(ref bone),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w)
+					OscType::String(ref bone),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w)
 				]
 			) => Ok(Message::BoneTransform(BoneTransform::new(
 				StandardVRM0Bone::from_str(bone).map_err(|_| Error::UnknownBone(bone.to_string()))?,
@@ -384,14 +418,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Hmd/Pos",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -404,14 +438,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Hmd/Pos/Local",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -424,14 +458,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Con/Pos",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -444,14 +478,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Con/Pos/Local",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -464,14 +498,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Tra/Pos",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -484,14 +518,14 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/Tra/Pos/Local",
 				&[
-					OSCType::String(ref joint),
-					OSCType::Float(p_x),
-					OSCType::Float(p_y),
-					OSCType::Float(p_z),
-					OSCType::Float(r_x),
-					OSCType::Float(r_y),
-					OSCType::Float(r_z),
-					OSCType::Float(r_w),
+					OscType::String(ref joint),
+					OscType::Float(p_x),
+					OscType::Float(p_y),
+					OscType::Float(p_z),
+					OscType::Float(r_x),
+					OscType::Float(r_y),
+					OscType::Float(r_z),
+					OscType::Float(r_w),
 					..
 				]
 			) => Ok(Message::DeviceTransform(DeviceTransform::new(
@@ -501,10 +535,10 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 				Quat::from_xyzw(r_x, r_y, r_z, r_w),
 				true
 			))),
-			("/VMC/Ext/Blend/Val", &[OSCType::String(ref shape), OSCType::Float(val), ..]) => Ok(Message::BlendShape(BlendShape::new(shape, val))),
+			("/VMC/Ext/Blend/Val", &[OscType::String(ref shape), OscType::Float(val), ..]) => Ok(Message::BlendShape(BlendShape::new(shape, val))),
 			("/VMC/Ext/Blend/Apply", &[..]) => Ok(Message::ApplyBlendShapes),
-			("/VMC/Ext/OK", &[OSCType::Int(model_state)]) => Ok(Message::State(State::new(model_state.try_into().map_err(Error::UnknownModelState)?))),
-			("/VMC/Ext/OK", &[OSCType::Int(model_state), OSCType::Int(calibration_state), OSCType::Int(calibration_mode)]) => {
+			("/VMC/Ext/OK", &[OscType::Int(model_state)]) => Ok(Message::State(State::new(model_state.try_into().map_err(Error::UnknownModelState)?))),
+			("/VMC/Ext/OK", &[OscType::Int(model_state), OscType::Int(calibration_state), OscType::Int(calibration_mode)]) => {
 				Ok(Message::State(State::new_calibration(
 					model_state.try_into().map_err(Error::UnknownModelState)?,
 					calibration_mode.try_into().map_err(Error::UnknownCalibrationMode)?,
@@ -514,10 +548,10 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 			(
 				"/VMC/Ext/OK",
 				&[
-					OSCType::Int(model_state),
-					OSCType::Int(calibration_state),
-					OSCType::Int(calibration_mode),
-					OSCType::Int(tracking_state),
+					OscType::Int(model_state),
+					OscType::Int(calibration_state),
+					OscType::Int(calibration_mode),
+					OscType::Int(tracking_state),
 					..
 				]
 			) => Ok(Message::State(State::new_tracking(
@@ -526,7 +560,7 @@ pub fn parse(osc_packet: OSCPacket) -> Result<Vec<Message>> {
 				calibration_state.try_into().map_err(Error::UnknownCalibrationState)?,
 				tracking_state.try_into().map_err(Error::UnknownTrackingState)?
 			))),
-			("/VMC/Ext/T", &[OSCType::Float(time), ..]) => Ok(Message::Time(Time::new(time))),
+			("/VMC/Ext/T", &[OscType::Float(time), ..]) => Ok(Message::Time(Time::new(time))),
 			(addr, args) => Err(Error::UnimplementedMessage(addr.to_owned(), args.to_owned()))
 		})
 		.collect()
@@ -537,7 +571,7 @@ mod tests {
 	use approx::assert_relative_eq;
 
 	use super::*;
-	use crate::{StandardVRMBlendShape, osc::IntoOSCPacket};
+	use crate::{IntoOSCPacket, StandardVRMBlendShape};
 
 	#[test]
 	fn test_parse_root_transform() -> Result<()> {
@@ -718,7 +752,13 @@ mod tests {
 
 	#[test]
 	fn test_ignore_extra_args() -> Result<()> {
-		assert!(parse(OSCPacket::Message(OSCMessage::new("/VMC/Ext/T", (7.0_f32, "hello")))).is_ok());
+		assert!(
+			parse(OscPacket::Message(OscMessage {
+				addr: "/VMC/Ext/T".to_string(),
+				args: vec![OscType::Float(7.0), OscType::String("hello".to_string())]
+			}))
+			.is_ok()
+		);
 		Ok(())
 	}
 }

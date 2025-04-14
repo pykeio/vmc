@@ -3,13 +3,11 @@ use std::{
 	io::{self}
 };
 
-use crate::osc::{OSCError, OSCType};
-
 #[derive(Debug)]
 pub enum Error {
 	Io(io::Error),
-	Osc(OSCError),
-	UnimplementedMessage(String, Vec<OSCType>),
+	Osc(rosc::OscError),
+	UnimplementedMessage(String, Vec<rosc::OscType>),
 	UnknownBone(String),
 	UnknownBlendShape(String),
 	UnknownModelState(i32),
@@ -39,8 +37,8 @@ impl From<io::Error> for Error {
 		Self::Io(value)
 	}
 }
-impl From<OSCError> for Error {
-	fn from(value: OSCError) -> Self {
+impl From<rosc::OscError> for Error {
+	fn from(value: rosc::OscError) -> Self {
 		Self::Osc(value)
 	}
 }

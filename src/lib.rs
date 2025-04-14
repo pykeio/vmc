@@ -54,23 +54,44 @@ use std::{
 };
 
 use futures_core::Stream;
+use rosc::OscPacket;
 use tokio::net::{ToSocketAddrs, UdpSocket};
 
 mod definitions;
 mod error;
 pub mod message;
-pub mod osc;
+pub extern crate rosc;
 mod udp;
 
+use self::udp::UDPSocketStream;
 pub use self::{
 	definitions::*,
 	error::{Error, Result},
 	message::{ApplyBlendShapes, BlendShape, BoneTransform, DeviceTransform, Message, RootTransform, State, Time, parse}
 };
-use self::{
-	osc::{IntoOSCPacket, OSCPacket},
-	udp::UDPSocketStream
-};
+
+pub(crate) trait IntoOSCMessage {
+	fn into_osc_message(self) -> rosc::OscMessage;
+}
+
+pub trait IntoOSCPacket {
+	fn into_osc_packet(self) -> rosc::OscPacket;
+}
+
+impl<T> IntoOSCPacket for T
+where
+	T: IntoOSCMessage
+{
+	fn into_osc_packet(self) -> rosc::OscPacket {
+		rosc::OscPacket::Message(self.into_osc_message())
+	}
+}
+
+impl IntoOSCPacket for rosc::OscBundle {
+	fn into_osc_packet(self) -> rosc::OscPacket {
+		rosc::OscPacket::Bundle(self)
+	}
+}
 
 /// A UDP socket to send and receive VMC messages.
 #[derive(Debug)]
@@ -133,7 +154,7 @@ impl VMCSocket {
 	/// # Ok(()) }) }
 	/// ```
 	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> Result<()> {
-		let buf = self::osc::encode(&packet.into_osc_packet())?;
+		let buf = rosc::encoder::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send_to(&buf[..], addrs).await?;
 		check_len(&buf[..], n)
 	}
@@ -158,7 +179,7 @@ impl VMCSocket {
 	/// # Ok(()) }) }
 	/// ```
 	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> Result<()> {
-		let buf = self::osc::encode(&packet.into_osc_packet())?;
+		let buf = rosc::encoder::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send(&buf[..]).await?;
 		check_len(&buf[..], n)
 	}
@@ -186,7 +207,7 @@ impl VMCSocket {
 }
 
 impl Stream for VMCSocket {
-	type Item = Result<(OSCPacket, SocketAddr)>;
+	type Item = Result<(OscPacket, SocketAddr)>;
 	fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
 		let packet = match Pin::new(&mut self.socket).poll_next(cx) {
 			Poll::Ready(packet) => packet,
@@ -194,7 +215,7 @@ impl Stream for VMCSocket {
 		};
 		let message = packet.map(|packet| match packet {
 			Err(err) => Err(err.into()),
-			Ok((buf, peer_addr)) => self::osc::decode_udp(&buf[..]).map_err(|e| e.into()).map(|p| (p.1, peer_addr))
+			Ok((buf, peer_addr)) => rosc::decoder::decode_udp(&buf[..]).map_err(|e| e.into()).map(|p| (p.1, peer_addr))
 		});
 		Poll::Ready(message)
 	}
@@ -217,7 +238,7 @@ impl VMCSender {
 	///
 	/// See [`VMCSocket::send_to`].
 	pub async fn send_to<A: ToSocketAddrs, P: IntoOSCPacket>(&self, packet: P, addrs: A) -> Result<()> {
-		let buf = self::osc::encode(&packet.into_osc_packet())?;
+		let buf = rosc::encoder::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send_to(&buf[..], addrs).await?;
 		check_len(&buf[..], n)
 	}
@@ -226,7 +247,7 @@ impl VMCSender {
 	///
 	/// See [`VMCSocket::send`].
 	pub async fn send<P: IntoOSCPacket>(&self, packet: P) -> Result<()> {
-		let buf = self::osc::encode(&packet.into_osc_packet())?;
+		let buf = rosc::encoder::encode(&packet.into_osc_packet())?;
 		let n = self.socket().send(&buf[..]).await?;
 		check_len(&buf[..], n)
 	}

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::osc::OSCType;
+use rosc::OscType;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -481,9 +481,9 @@ pub enum ModelState {
 	Loaded = 1
 }
 
-impl From<ModelState> for OSCType {
+impl From<ModelState> for OscType {
 	fn from(value: ModelState) -> Self {
-		OSCType::Int(value as i32)
+		OscType::Int(value as i32)
 	}
 }
 
@@ -513,9 +513,9 @@ pub enum CalibrationState {
 	Calibrated = 3
 }
 
-impl From<CalibrationState> for OSCType {
+impl From<CalibrationState> for OscType {
 	fn from(value: CalibrationState) -> Self {
-		OSCType::Int(value as i32)
+		OscType::Int(value as i32)
 	}
 }
 
@@ -542,9 +542,9 @@ pub enum CalibrationMode {
 	MixedRealityFloor = 2
 }
 
-impl From<CalibrationMode> for OSCType {
+impl From<CalibrationMode> for OscType {
 	fn from(value: CalibrationMode) -> Self {
-		OSCType::Int(value as i32)
+		OscType::Int(value as i32)
 	}
 }
 
@@ -572,9 +572,9 @@ pub enum TrackingState {
 	Good = 1
 }
 
-impl From<TrackingState> for OSCType {
+impl From<TrackingState> for OscType {
 	fn from(value: TrackingState) -> Self {
-		OSCType::Int(value as i32)
+		OscType::Int(value as i32)
 	}
 }
 

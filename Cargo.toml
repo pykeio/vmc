@@ -13,6 +13,7 @@ authors = [
 	"Carson M. <carson@pyke.io>"
 ]
 rust-version = "1.88"
+include = ["src/"]
 
 [features]
 default = []

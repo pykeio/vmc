@@ -46,8 +46,8 @@ impl From<rosc::OscError> for Error {
 impl std::error::Error for Error {
 	fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
 		match self {
-			Error::Io(ref err) => Some(err),
-			Error::Osc(ref err) => err.source(),
+			Error::Io(err) => Some(err),
+			Error::Osc(err) => err.source(),
 			_ => None
 		}
 	}

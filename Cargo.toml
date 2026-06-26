@@ -6,13 +6,13 @@ description = "Implementation of Virtual Motion Capture protocol for virtual ava
 repository = "https://github.com/pykeio/vmc"
 documentation = "https://docs.rs/vmc"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
 keywords = [ "osc" ]
 categories = [ "network-programming", "asynchronous" ]
 authors = [
 	"Carson M. <carson@pyke.io>"
 ]
-rust-version = "1.70"
+rust-version = "1.88"
 
 [features]
 default = []

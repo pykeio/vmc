@@ -470,6 +470,212 @@ impl PartialEq<StandardVRMBlendShape> for String {
 	}
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum KiTraBlendShape {
+	LeftEyeBlink,
+	LeftEyeLookDown,
+	LeftEyeLookIn,
+	LeftEyeLookOut,
+	LeftEyeLookUp,
+	LeftEyeSquint,
+	LeftEyeWiden,
+	RightEyeBlink,
+	RightEyeLookDown,
+	RightEyeLookIn,
+	RightEyeLookOut,
+	RightEyeLookUp,
+	RightEyeSquint,
+	RightEyeWiden,
+	JawForward,
+	JawLeft,
+	JawRight,
+	JawOpen,
+	TongueOut,
+	MouthFunnel,
+	MouthPucker,
+	MouthClose,
+	MouthLeft,
+	MouthRight,
+	MouthSmileLeft,
+	MouthSmileRight,
+	MouthFrownLeft,
+	MouthFrownRight,
+	MouthDimpleLeft,
+	MouthDimpleRight,
+	MouthStretchLeft,
+	MouthStretchRight,
+	MouthRollLower,
+	MouthRollUpper,
+	MouthShrugLower,
+	MouthShrugUpper,
+	MouthPressLeft,
+	MouthPressRight,
+	MouthLowerDownLeft,
+	MouthLowerDownRight,
+	MouthUpperUpLeft,
+	MouthUpperUpRight,
+	BrowDownLeft,
+	BrowDownRight,
+	BrowInnerUp,
+	BrowOuterUpLeft,
+	BrowOuterUpRight,
+	CheekPuff,
+	CheekSquintLeft,
+	CheekSquintRight,
+	NoseSneerLeft,
+	NoseSneerRight
+}
+
+impl AsRef<str> for KiTraBlendShape {
+	fn as_ref(&self) -> &str {
+		match self {
+			KiTraBlendShape::LeftEyeBlink => "leftEyeBlink",
+			KiTraBlendShape::LeftEyeLookDown => "leftEyeLookDown",
+			KiTraBlendShape::LeftEyeLookIn => "leftEyeLookIn",
+			KiTraBlendShape::LeftEyeLookOut => "leftEyeLookOut",
+			KiTraBlendShape::LeftEyeLookUp => "leftEyeLookUp",
+			KiTraBlendShape::LeftEyeSquint => "leftEyeSquint",
+			KiTraBlendShape::LeftEyeWiden => "leftEyeWiden",
+			KiTraBlendShape::RightEyeBlink => "rightEyeBlink",
+			KiTraBlendShape::RightEyeLookDown => "rightEyeLookDown",
+			KiTraBlendShape::RightEyeLookIn => "rightEyeLookIn",
+			KiTraBlendShape::RightEyeLookOut => "rightEyeLookOut",
+			KiTraBlendShape::RightEyeLookUp => "rightEyeLookUp",
+			KiTraBlendShape::RightEyeSquint => "rightEyeSquint",
+			KiTraBlendShape::RightEyeWiden => "rightEyeWiden",
+			KiTraBlendShape::JawForward => "jawForward",
+			KiTraBlendShape::JawLeft => "jawLeft",
+			KiTraBlendShape::JawRight => "jawRight",
+			KiTraBlendShape::JawOpen => "jawOpen",
+			KiTraBlendShape::TongueOut => "tongueOut",
+			KiTraBlendShape::MouthFunnel => "mouthFunnel",
+			KiTraBlendShape::MouthPucker => "mouthPucker",
+			KiTraBlendShape::MouthClose => "mouthClose",
+			KiTraBlendShape::MouthLeft => "mouthLeft",
+			KiTraBlendShape::MouthRight => "mouthRight",
+			KiTraBlendShape::MouthSmileLeft => "mouthSmileLeft",
+			KiTraBlendShape::MouthSmileRight => "mouthSmileRight",
+			KiTraBlendShape::MouthFrownLeft => "mouthFrownLeft",
+			KiTraBlendShape::MouthFrownRight => "mouthFrownRight",
+			KiTraBlendShape::MouthDimpleLeft => "mouthDimpleLeft",
+			KiTraBlendShape::MouthDimpleRight => "mouthDimpleRight",
+			KiTraBlendShape::MouthStretchLeft => "mouthStretchLeft",
+			KiTraBlendShape::MouthStretchRight => "mouthStretchRight",
+			KiTraBlendShape::MouthRollLower => "mouthRollLower",
+			KiTraBlendShape::MouthRollUpper => "mouthRollUpper",
+			KiTraBlendShape::MouthShrugLower => "mouthShrugLower",
+			KiTraBlendShape::MouthShrugUpper => "mouthShrugUpper",
+			KiTraBlendShape::MouthPressLeft => "mouthPressLeft",
+			KiTraBlendShape::MouthPressRight => "mouthPressRight",
+			KiTraBlendShape::MouthLowerDownLeft => "mouthLowerDownLeft",
+			KiTraBlendShape::MouthLowerDownRight => "mouthLowerDownRight",
+			KiTraBlendShape::MouthUpperUpLeft => "mouthUpperUpLeft",
+			KiTraBlendShape::MouthUpperUpRight => "mouthUpperUpRight",
+			KiTraBlendShape::BrowDownLeft => "browDownLeft",
+			KiTraBlendShape::BrowDownRight => "browDownRight",
+			KiTraBlendShape::BrowInnerUp => "browInnerUp",
+			KiTraBlendShape::BrowOuterUpLeft => "browOuterUpLeft",
+			KiTraBlendShape::BrowOuterUpRight => "browOuterUpRight",
+			KiTraBlendShape::CheekPuff => "cheekPuff",
+			KiTraBlendShape::CheekSquintLeft => "cheekSquintLeft",
+			KiTraBlendShape::CheekSquintRight => "cheekSquintRight",
+			KiTraBlendShape::NoseSneerLeft => "noseSneerLeft",
+			KiTraBlendShape::NoseSneerRight => "noseSneerRight"
+		}
+	}
+}
+
+impl ToString for KiTraBlendShape {
+	fn to_string(&self) -> String {
+		self.as_ref().to_owned()
+	}
+}
+
+impl FromStr for KiTraBlendShape {
+	type Err = ();
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"leftEyeBlink" => Ok(KiTraBlendShape::LeftEyeBlink),
+			"leftEyeLookDown" => Ok(KiTraBlendShape::LeftEyeLookDown),
+			"leftEyeLookIn" => Ok(KiTraBlendShape::LeftEyeLookIn),
+			"leftEyeLookOut" => Ok(KiTraBlendShape::LeftEyeLookOut),
+			"leftEyeLookUp" => Ok(KiTraBlendShape::LeftEyeLookUp),
+			"leftEyeSquint" => Ok(KiTraBlendShape::LeftEyeSquint),
+			"leftEyeWiden" => Ok(KiTraBlendShape::LeftEyeWiden),
+			"rightEyeBlink" => Ok(KiTraBlendShape::RightEyeBlink),
+			"rightEyeLookDown" => Ok(KiTraBlendShape::RightEyeLookDown),
+			"rightEyeLookIn" => Ok(KiTraBlendShape::RightEyeLookIn),
+			"rightEyeLookOut" => Ok(KiTraBlendShape::RightEyeLookOut),
+			"rightEyeLookUp" => Ok(KiTraBlendShape::RightEyeLookUp),
+			"rightEyeSquint" => Ok(KiTraBlendShape::RightEyeSquint),
+			"rightEyeWiden" => Ok(KiTraBlendShape::RightEyeWiden),
+			"jawForward" => Ok(KiTraBlendShape::JawForward),
+			"jawLeft" => Ok(KiTraBlendShape::JawLeft),
+			"jawRight" => Ok(KiTraBlendShape::JawRight),
+			"jawOpen" => Ok(KiTraBlendShape::JawOpen),
+			"tongueOut" => Ok(KiTraBlendShape::TongueOut),
+			"mouthFunnel" => Ok(KiTraBlendShape::MouthFunnel),
+			"mouthPucker" => Ok(KiTraBlendShape::MouthPucker),
+			"mouthClose" => Ok(KiTraBlendShape::MouthClose),
+			"mouthLeft" => Ok(KiTraBlendShape::MouthLeft),
+			"mouthRight" => Ok(KiTraBlendShape::MouthRight),
+			"mouthSmileLeft" => Ok(KiTraBlendShape::MouthSmileLeft),
+			"mouthSmileRight" => Ok(KiTraBlendShape::MouthSmileRight),
+			"mouthFrownLeft" => Ok(KiTraBlendShape::MouthFrownLeft),
+			"mouthFrownRight" => Ok(KiTraBlendShape::MouthFrownRight),
+			"mouthDimpleLeft" => Ok(KiTraBlendShape::MouthDimpleLeft),
+			"mouthDimpleRight" => Ok(KiTraBlendShape::MouthDimpleRight),
+			"mouthStretchLeft" => Ok(KiTraBlendShape::MouthStretchLeft),
+			"mouthStretchRight" => Ok(KiTraBlendShape::MouthStretchRight),
+			"mouthRollLower" => Ok(KiTraBlendShape::MouthRollLower),
+			"mouthRollUpper" => Ok(KiTraBlendShape::MouthRollUpper),
+			"mouthShrugLower" => Ok(KiTraBlendShape::MouthShrugLower),
+			"mouthShrugUpper" => Ok(KiTraBlendShape::MouthShrugUpper),
+			"mouthPressLeft" => Ok(KiTraBlendShape::MouthPressLeft),
+			"mouthPressRight" => Ok(KiTraBlendShape::MouthPressRight),
+			"mouthLowerDownLeft" => Ok(KiTraBlendShape::MouthLowerDownLeft),
+			"mouthLowerDownRight" => Ok(KiTraBlendShape::MouthLowerDownRight),
+			"mouthUpperUpLeft" => Ok(KiTraBlendShape::MouthUpperUpLeft),
+			"mouthUpperUpRight" => Ok(KiTraBlendShape::MouthUpperUpRight),
+			"browDownLeft" => Ok(KiTraBlendShape::BrowDownLeft),
+			"browDownRight" => Ok(KiTraBlendShape::BrowDownRight),
+			"browInnerUp" => Ok(KiTraBlendShape::BrowInnerUp),
+			"browOuterUpLeft" => Ok(KiTraBlendShape::BrowOuterUpLeft),
+			"browOuterUpRight" => Ok(KiTraBlendShape::BrowOuterUpRight),
+			"cheekPuff" => Ok(KiTraBlendShape::CheekPuff),
+			"cheekSquintLeft" => Ok(KiTraBlendShape::CheekSquintLeft),
+			"cheekSquintRight" => Ok(KiTraBlendShape::CheekSquintRight),
+			"noseSneerLeft" => Ok(KiTraBlendShape::NoseSneerLeft),
+			"noseSneerRight" => Ok(KiTraBlendShape::NoseSneerRight),
+			_ => Err(())
+		}
+	}
+}
+
+impl PartialEq<&str> for KiTraBlendShape {
+	fn eq(&self, other: &&str) -> bool {
+		KiTraBlendShape::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<String> for KiTraBlendShape {
+	fn eq(&self, other: &String) -> bool {
+		KiTraBlendShape::from_str(other).as_ref() == Ok(self)
+	}
+}
+impl PartialEq<KiTraBlendShape> for &str {
+	fn eq(&self, other: &KiTraBlendShape) -> bool {
+		KiTraBlendShape::from_str(self).as_ref() == Ok(other)
+	}
+}
+impl PartialEq<KiTraBlendShape> for String {
+	fn eq(&self, other: &KiTraBlendShape) -> bool {
+		KiTraBlendShape::from_str(self).as_ref() == Ok(other)
+	}
+}
+
 /// Loading state of the virtual avatar on the sender's side.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
